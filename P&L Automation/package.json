@@ -1,0 +1,20 @@
+{
+  "name": "ai-value-creation-slides",
+  "version": "1.0.0",
+  "description": "AI Value Creation Slides Generator for Pitch.com",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ai",
+    "slides",
+    "pitch",
+    "consulting",
+    "mckinsey"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}

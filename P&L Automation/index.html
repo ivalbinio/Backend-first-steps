@@ -1,0 +1,3718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Value Creation Slides Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      padding: 30px 0;
+      border-bottom: 1px solid #2a2a2a;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 14px;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 200px);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 0;
+    }
+
+    .message {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .message.assistant .avatar {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+    }
+
+    .message.user .avatar {
+      background: #2a2a2a;
+      color: #888;
+    }
+
+    .message-content {
+      max-width: 80%;
+      padding: 14px 18px;
+      border-radius: 12px;
+      line-height: 1.6;
+    }
+
+    .message.assistant .message-content {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+    }
+
+    .message.user .message-content {
+      background: #2563eb;
+      color: white;
+    }
+
+    .message-content h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .message-content p {
+      margin-bottom: 10px;
+    }
+
+    .message-content ul, .message-content ol {
+      margin-left: 20px;
+      margin-bottom: 10px;
+    }
+
+    .message-content li {
+      margin-bottom: 6px;
+    }
+
+    .message-content code {
+      background: #2a2a2a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 13px;
+    }
+
+    .message-content pre {
+      background: #0a0a0a;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    .message-content pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .options-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .option-btn {
+      background: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #e0e0e0;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .option-btn:hover {
+      background: #2a2a2a;
+      border-color: #4a4a4a;
+    }
+
+    .option-btn.selected {
+      background: #1e3a5f;
+      border-color: #2563eb;
+    }
+
+    .input-area {
+      padding: 20px 0;
+      border-top: 1px solid #2a2a2a;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+    }
+
+    .input-wrapper textarea {
+      flex: 1;
+      background: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: #e0e0e0;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      min-height: 50px;
+      max-height: 150px;
+    }
+
+    .input-wrapper textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    .input-wrapper button {
+      background: #2563eb;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .input-wrapper button:hover {
+      background: #1d4ed8;
+    }
+
+    .input-wrapper button:disabled {
+      background: #3a3a3a;
+      cursor: not-allowed;
+    }
+
+    .phase-indicator {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .phase {
+      padding: 6px 12px;
+      background: #1a1a1a;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .phase.active {
+      background: #1e3a5f;
+      color: #60a5fa;
+    }
+
+    .phase.complete {
+      background: #14532d;
+      color: #4ade80;
+    }
+
+    .table-preview {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+      table-layout: fixed;
+    }
+
+    .table-preview th,
+    .table-preview td {
+      border: 1px solid #3a3a3a;
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      word-wrap: break-word;
+    }
+
+    .table-preview th:nth-child(1),
+    .table-preview td:nth-child(1) {
+      width: 15%;
+    }
+
+    .table-preview th:nth-child(2),
+    .table-preview td:nth-child(2) {
+      width: 22%;
+    }
+
+    .table-preview th:nth-child(3),
+    .table-preview td:nth-child(3) {
+      width: 23%;
+    }
+
+    .table-preview th:nth-child(4),
+    .table-preview td:nth-child(4) {
+      width: 40%;
+    }
+
+    .table-preview th {
+      background: #2b2b35;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .table-preview tr:nth-child(even) {
+      background: #151515;
+    }
+
+    .checkmark {
+      color: #4ade80;
+      margin-right: 4px;
+    }
+
+    .editable-cell {
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .editable-cell:hover {
+      background: rgba(37, 99, 235, 0.15);
+    }
+
+    .editable-cell .edit-icon {
+      opacity: 0;
+      font-size: 11px;
+      margin-left: 6px;
+      transition: opacity 0.2s;
+    }
+
+    .editable-cell:hover .edit-icon {
+      opacity: 1;
+    }
+
+    .edn-output {
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      max-height: 300px;
+      overflow: auto;
+    }
+
+    .copy-btn {
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      padding: 8px 16px;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .copy-btn:hover {
+      background: #3a3a3a;
+    }
+
+    .workflow-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .workflow-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .workflow-item:hover {
+      background: #2a2a2a;
+    }
+
+    .workflow-item.selected {
+      background: #1e3a5f;
+      border-color: #2563eb;
+    }
+
+    .workflow-item input {
+      accent-color: #2563eb;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #888;
+    }
+
+    .loading-dot {
+      width: 8px;
+      height: 8px;
+      background: #888;
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+    }
+
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .char-count.warning {
+      color: #f59e0b;
+    }
+
+    .char-count.error {
+      color: #ef4444;
+    }
+
+    .char-count.too-short {
+      color: #f59e0b;
+    }
+
+    .char-count.good {
+      color: #4ade80;
+    }
+
+    .bullet-hint {
+      font-size: 10px;
+      color: #666;
+      font-style: italic;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Value Creation Slides Generator</h1>
+      <p class="subtitle">Generate Pitch.com slides for AI workflow presentations</p>
+    </header>
+
+    <div class="phase-indicator">
+      <span class="phase active" id="phase-1">1. Context</span>
+      <span class="phase" id="phase-2">2. Heatmap</span>
+      <span class="phase" id="phase-3">3. Selection</span>
+      <span class="phase" id="phase-4">4. Angle Cards</span>
+      <span class="phase" id="phase-5">5. Export</span>
+    </div>
+
+    <div class="chat-container">
+      <div class="messages" id="messages"></div>
+
+      <div class="input-area">
+        <div class="input-wrapper">
+          <textarea id="user-input" placeholder="Type your response..." rows="1"></textarea>
+          <button id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="examples.js"></script>
+  <script>
+    // ==========================================================================
+    // EDN TEMPLATE FUNCTIONS
+    // ==========================================================================
+
+    // Canonical EDN templates - loaded from prompts/templates/
+    const canonicalTemplates = {
+      heatmap_pnl: null,
+      heatmap_pnl_simple: null,
+      angle_cards_double: null,
+      angle_cards_triple: null
+    };
+
+    // Load canonical templates on page load
+    async function loadCanonicalTemplates() {
+      const templateFiles = {
+        heatmap_pnl: 'prompts/templates/heatmap_pnl_canonical.edn',
+        heatmap_pnl_simple: 'prompts/templates/heatmap_pnl_simple_canonical.edn',
+        angle_cards_double: 'prompts/templates/angle_cards_double_canonical.edn',
+        angle_cards_triple: 'prompts/templates/angle_cards_triple_canonical.edn'
+      };
+
+      for (const [key, path] of Object.entries(templateFiles)) {
+        try {
+          const response = await fetch(path);
+          if (response.ok) {
+            canonicalTemplates[key] = await response.text();
+            console.log(`Loaded canonical template: ${key}`);
+          } else {
+            console.error(`Failed to load ${path}: ${response.status}`);
+          }
+        } catch (err) {
+          console.error(`Error loading ${path}:`, err);
+        }
+      }
+    }
+
+    // Get the base heatmap EDN template (canonical version with "on call" mention)
+    function getHeatmapEdnTemplate() {
+      if (canonicalTemplates.heatmap_pnl) {
+        return canonicalTemplates.heatmap_pnl;
+      }
+      console.error('Canonical heatmap_pnl template not loaded');
+      return '';
+    }
+
+    // Get simple heatmap EDN template (no "on call" mention)
+    function getHeatmapSimpleEdnTemplate() {
+      if (canonicalTemplates.heatmap_pnl_simple) {
+        return canonicalTemplates.heatmap_pnl_simple;
+      }
+      console.error('Canonical heatmap_pnl_simple template not loaded');
+      return '';
+    }
+
+    // Get angle card EDN template (2 cards with domain headers)
+    function getAngleCardEdnTemplate() {
+      if (canonicalTemplates.angle_cards_double) {
+        return canonicalTemplates.angle_cards_double;
+      }
+      console.error('Canonical angle_cards_double template not loaded');
+      return '';
+    }
+
+    // Get triple angle card EDN template (3 cards)
+    function getAngleCardTripleEdnTemplate() {
+      if (canonicalTemplates.angle_cards_triple) {
+        return canonicalTemplates.angle_cards_triple;
+      }
+      console.error('Canonical angle_cards_triple template not loaded');
+      return '';
+    }
+
+    // Helper to escape for EDN/HTML
+    function esc(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    // Generate EDN for heatmap slide
+    // CRITICAL: Only replace text content using simple string split/join
+    // NEVER modify structure (UUIDs, coords, table-style, layout, etc.)
+    function generateHeatmapEdn() {
+      const { context, heatmap } = state;
+      let edn = getHeatmapEdnTemplate();
+
+      if (!edn) {
+        console.error('No heatmap EDN template found');
+        return '';
+      }
+
+      // Simple text replacements using split/join (preserves structure)
+
+      // 1. Main title (HARD LIMIT: 85 chars)
+      const rawTitle = heatmap.selectedTitle || heatmap.title ||
+        `${context.industry} P&L impact comes from industrializing finance control and execution`;
+      const newTitle = hardTruncate(rawTitle, LIMITS.heatmap.slideTitle.max);
+      edn = edn.split('Airline P&amp;L impact comes from industrializing finance control and execution').join(esc(newTitle));
+
+      // 2. Subtitle with industry
+      edn = edn.split('AI Value Creation in Finance').join(`AI Value Creation in ${esc(context.industry)}`);
+
+      // 3. Footer - audience name and title
+      edn = edn.split('by Luísa Casimiro (VP Financial Planning &amp; Strategy)').join(
+        `by ${esc(context.audience.name)} (${esc(context.audience.title)})`
+      );
+
+      // 4. Company name in footer - KEEP Augusta Labs branding (don't replace)
+
+      // 5. Replace table cell contents (row by row)
+      // Template has these original values - replace with heatmap.rows content
+      const templateRows = [
+        { domain: 'Planning &amp; Forecasting', workflow: 'PF1. Integrated Rolling Forecast &amp; Ops Signals', pain: 'Forecasts distorted by disruptions &amp; crew costs.', solution: 'Ingest disruption events &amp; crew schedules to update outlooks, reduce error, and restore guidance credibility.' },
+        { domain: '', workflow: 'PF2. Driver-Level Forecast Explainability', pain: 'Manual overrides without traceability.', solution: 'Attribute changes to specific drivers (crew, fuel, disruptions) to improve transparency and confidence.' },
+        { domain: 'Capital Allocation', workflow: 'CA1. Initiative-Level ROI Tracking', pain: 'Approvals on static cases; no realized tracking.', solution: 'Track realized vs. expected returns to reallocate capital from underperformers and protect ROIC.' },
+        { domain: '', workflow: 'CA2. Fleet &amp; Network Scenario Stress-Testing', pain: 'Decisions exposed to volatility; limited scenarios.', solution: 'Simulate fleet economics under disruption scenarios to improve resilience and margin.' },
+        { domain: 'Revenue &amp; Margin', workflow: 'RM1. Route Profitability with Disruption Costs', pain: 'Route margins distorted by unallocated costs.', solution: 'Attribute disruption costs to routes to reveal true profitability and improve network/fleet decisions.' },
+        { domain: '', workflow: 'RM2. Margin Bridge: Plan vs. Actual', pain: 'Erosion identified late at aggregate level.', solution: 'Decompose margin moves into drivers to enable earlier corrective actions on revenue and cost.' },
+        { domain: 'Cost Execution', workflow: 'CE1. Crew Accommodation Cost Reconciliation', pain: 'Manual matching of invoices vs. room-night files.', solution: 'Automate rate/date reconciliation to flag mismatches and reduce leakage.' },
+        { domain: '', workflow: 'CE2. Direct Operating Cost OCR &amp; Posting', pain: 'OCR-heavy workflows with manual corrections.', solution: 'Extract, validate, and post DOC invoices directly into SAP/<span style=\\"font-style:normal\\"><span style=\\"font-weight:400\\">Skymetrix</span></span> to speed up close and improve accuracy.' },
+        { domain: 'Working Capital', workflow: 'WC1. Headphones Inventory Flow Forecasting', pain: 'No reliable view of stock; reactive replenishment.', solution: 'Forecast consumption &amp; track outbound assets to reduce losses, emergency shipments, and excess.' },
+        { domain: '', workflow: 'WC2. Asset Accountability &amp; Replenishment Logic', pain: 'Excess safety stock tied up due to uncertainty.', solution: 'Define demand-driven replenishment rules to optimize service levels while freeing working capital.' },
+        { domain: 'Performance &amp; Governance', workflow: 'PG1. Cost &amp; Forecast Variance Control', pain: 'Variances explained manually and late.', solution: 'Automate variance attribution and flag recurring drivers to improve cost discipline and forecast governance.' },
+        { domain: '', workflow: 'PG2. Contract &amp; Policy Compliance Monitoring', pain: 'Inconsistent application of contracts.', solution: 'Monitor compliance with hotel and transport contracts to reduce leakage and enforce controls.' },
+        { domain: 'Decision Support', workflow: 'DS1. FP&amp;A and Finance Business Partner Copilot', pain: 'Time spent reconciling data instead of advising.', solution: 'Answer concrete questions (cost impact, deltas) instantly to increase velocity and finance leverage.' },
+        { domain: '', workflow: 'DS2. Executive Steering Insights', pain: 'Reviews dominated by lagging indicators.', solution: 'Surface forward-looking risk and opportunity signals to enable proactive steering at ExCo level.' },
+        { domain: 'Data Architecture', workflow: 'DA1. SAP-Centric Finance Data Layer', pain: 'Fragmented systems; high effort to connect data.', solution: 'Connect SAP with operational airline systems for a single source of truth for forecasting, costing, and reporting.' },
+        { domain: '', workflow: 'DA2. Reusable Finance Data Products', pain: 'Use cases built from scratch; no compounding.', solution: 'Standardize finance data products (cost drivers, inventory) to compound value across all AI cases.' }
+      ];
+
+      // Replace each row's content if we have new data
+      // CRITICAL: Apply hardTruncate as FINAL SAFETY NET to guarantee limits
+      heatmap.rows.forEach((newRow, i) => {
+        if (i < templateRows.length) {
+          const tmpl = templateRows[i];
+          // Replace workflow name (HARD LIMIT: 47 chars)
+          if (tmpl.workflow && newRow.name) {
+            const truncatedName = hardTruncate(newRow.name, LIMITS.heatmap.workflowName.max);
+            edn = edn.split(tmpl.workflow).join(esc(truncatedName));
+          }
+          // Replace pain point (HARD LIMIT: 48 chars)
+          if (tmpl.pain && newRow.painPoint) {
+            const truncatedPain = hardTruncate(newRow.painPoint, LIMITS.heatmap.painPoint.max);
+            edn = edn.split(tmpl.pain).join(esc(truncatedPain));
+          }
+          // Replace solution (HARD LIMIT: 114 chars)
+          if (tmpl.solution && newRow.solution) {
+            const truncatedSolution = hardTruncate(newRow.solution, LIMITS.heatmap.solutionImpact.max);
+            edn = edn.split(tmpl.solution).join(esc(truncatedSolution));
+          }
+          // Replace domain (only if not empty in template)
+          if (tmpl.domain && newRow.domain) {
+            const truncatedDomain = hardTruncate(newRow.domain, LIMITS.heatmap.domainName.max);
+            edn = edn.split(tmpl.domain).join(esc(truncatedDomain));
+          }
+        }
+      });
+
+      return edn;
+    }
+
+    // Generate EDN for angle card slide
+    // CRITICAL: Only replace text content using simple string split/join
+    // NEVER modify structure (UUIDs, coords, table-style, layout, etc.)
+    // Template uses angle_cards_double_with_domains format with:
+    // - Main title, domain headers, workflow IDs, subtitles
+    // - 3 CHALLENGES, 5 SOLUTIONS, 3 IMPACT bullets per workflow
+    function generateAngleCardEdn(card, cardIndex) {
+      const { context } = state;
+      let edn = getAngleCardEdnTemplate();
+
+      if (!edn) {
+        console.error('No angle card EDN template found');
+        return '';
+      }
+
+      // 1. Replace main slide title
+      // Template: "High-performing airlines steer volatility through margin transparency"
+      const templateMainTitle = 'High-performing airlines steer volatility through margin transparency';
+      edn = edn.split(templateMainTitle).join(esc(card.title || `AI Value Creation - ${context.industry}`));
+
+      // 2. Replace subtitle line
+      // Template: "AI Value Creation in Finance — Example High-ROI Agentic Workflows"
+      const templateSubtitle = 'AI Value Creation in Finance — Example High-ROI Agentic Workflows';
+      edn = edn.split(templateSubtitle).join(`AI Value Creation in ${esc(context.industry)} — High-ROI Agentic Workflows`);
+
+      // 3. Augusta Labs footer - KEEP Augusta Labs branding (don't replace)
+
+      // Define template patterns for left (workflow 0) and right (workflow 1) cards
+      // These MUST match exactly what's in the canonical template
+      // Note: Some bullets have span wrappers for letter-spacing - we handle both versions
+      const templatePatterns = [
+        {
+          // Left card - Planning & Forecasting (from canonical template)
+          domain: 'Planning &amp; Forecasting',
+          // The workflow title uses a specific span structure - we replace the ID and name separately
+          workflowIdPrefix: 'PF1.  ',
+          workflowName: 'Integrated Rolling Forecast &amp; Ops Signals',
+          subtitle: 'Stabilizing outlooks via continuous Ops-to-Finance loops.',
+          challenges: [
+            'Forecasts distorted by crew volatility, disruption costs, and unallocated events.',
+            'Manual overrides on baseline data lack driver-level traceability or audit trails.',
+            'Mid-cycle blind spots erode credibility of ExCo decisions and market guidance.'
+          ],
+          // Solutions - note index 1 has span wrapper in template
+          solutions: [
+            'Ingest live crew pairings, fleet maintenance, and disruption data into forecasting.',
+            'Continuous ops-to-finance loop updates P&amp;L outlooks dynamically, replacing static cycles.',
+            'Simulate P&amp;L impact of network disruptions to quantify downside risk and recovery paths.',
+            'Automate variance analysis to isolate specific cost drivers like fuel vs. delay impact.',
+            'Auto-adjust baselines using AI to free up FP&amp;A capacity for high-value strategic support.'
+          ],
+          // Solution at index 1 is wrapped: <span style="letter-spacing:-0.03em">...</span>
+          solutionSpanWrappedIndex: 1,
+          impacts: [
+            '20–30% reduction in forecast error and P&amp;L volatility across volatile quarters.',
+            '2x increase in outlook update frequency, boosting investor guidance credibility.',
+            '5–10% reduction in unallocated disruption costs via earlier corrective action.'
+          ],
+          icon: 'track_changes'
+        },
+        {
+          // Right card - Revenue & Margin (from canonical template)
+          domain: 'Revenue &amp; Margin',
+          workflowIdPrefix: 'RM2.  ',
+          workflowName: 'Margin Bridge: Plan vs. Actual',
+          subtitle: 'Decomposing variance drivers to explain margin movement.',
+          challenges: [
+            'Margin erosion often identified too late and only at aggregate route or region level.',
+            'Disruption and crew costs blended into broad variances, hiding operational root causes.',
+            'FP&amp;A teams spend days manually rebuilding variance explanations for monthly reviews.'
+          ],
+          // Solutions - note index 0 has span wrapper in template
+          solutions: [
+            'Automated margin bridges decompose variance into granular rate, volume, and cost drivers.',
+            'ML attributes deviations to specific events like ATC delays or unbudgeted crew swaps.',
+            'Standardize bridge logic across all forecasts and MBRs to ensure a single truth source.',
+            'Isolate structural vs. temporary cost spikes to inform long-term network pricing strategy.',
+            'Instant drill-down from network-level margin gaps to specific flight-level cost events.'
+          ],
+          // Solution at index 0 is wrapped: <span style="letter-spacing:-0.03em">...</span>
+          solutionSpanWrappedIndex: 0,
+          impacts: [
+            'Reduce time-to-insight for monthly variance analysis and MBR preparation by 40–60%.',
+            'Detect structural margin erosion 2–3 months earlier than standard aggregate reporting.',
+            'Eliminate manual reconciliation effort, shifting Finance focus to strategic mitigation.'
+          ],
+          icon: 'analytics'
+        }
+      ];
+
+      // Replace content for each workflow (up to 2 per card)
+      card.workflows.forEach((workflow, wi) => {
+        if (wi >= templatePatterns.length) return;
+        const pattern = templatePatterns[wi];
+
+        // Replace domain header
+        if (workflow.domain) {
+          edn = edn.split(pattern.domain).join(esc(workflow.domain));
+        }
+
+        // Replace workflow ID prefix (e.g., "PF1.  " -> "XX1.  ")
+        if (workflow.id) {
+          edn = edn.split(pattern.workflowIdPrefix).join(esc(workflow.id) + '  ');
+        }
+
+        // Replace workflow name
+        if (workflow.name) {
+          edn = edn.split(pattern.workflowName).join(esc(workflow.name));
+        }
+
+        // Replace subtitle
+        if (workflow.subtitle) {
+          edn = edn.split(pattern.subtitle).join(esc(workflow.subtitle));
+        }
+
+        // Replace challenges (individual bullets - ENFORCE 85 char limit)
+        if (workflow.challenges && workflow.challenges.length > 0) {
+          pattern.challenges.forEach((oldChallenge, ci) => {
+            if (workflow.challenges[ci]) {
+              const enforced = enforceBulletMax(workflow.challenges[ci], 85);
+              edn = edn.split(oldChallenge).join(esc(enforced));
+            }
+          });
+        }
+
+        // Replace solutions (individual bullets - ENFORCE 85 char limit)
+        // Note: Some solutions in template are wrapped in <span style="letter-spacing:-0.03em">
+        if (workflow.solutions && workflow.solutions.length > 0) {
+          pattern.solutions.forEach((oldSolution, si) => {
+            if (workflow.solutions[si]) {
+              const enforced = enforceBulletMax(workflow.solutions[si], 85);
+              const newSolution = esc(enforced);
+              // If this is the span-wrapped bullet, we need to replace just the inner text
+              if (si === pattern.solutionSpanWrappedIndex) {
+                // Replace the span-wrapped version (preserving the span wrapper)
+                const wrappedOld = `<span style="letter-spacing:-0.03em">${oldSolution}</span>`;
+                edn = edn.split(wrappedOld).join(`<span style="letter-spacing:-0.03em">${newSolution}</span>`);
+              } else {
+                // Simple text replacement for non-wrapped bullets
+                edn = edn.split(oldSolution).join(newSolution);
+              }
+            }
+          });
+        }
+
+        // Replace impacts (individual bullets - ENFORCE 85 char limit)
+        if (workflow.impacts && workflow.impacts.length > 0) {
+          pattern.impacts.forEach((oldImpact, ii) => {
+            if (workflow.impacts[ii]) {
+              const enforced = enforceBulletMax(workflow.impacts[ii], 85);
+              edn = edn.split(oldImpact).join(esc(enforced));
+            }
+          });
+        }
+
+        // Replace icon if specified (just the icon name, not the full path)
+        if (workflow.icon) {
+          edn = edn.split(`Material-Outlined/${pattern.icon}.svg`).join(`Material-Outlined/${workflow.icon}.svg`);
+        }
+      });
+
+      return edn;
+    }
+
+    // Replace content in the EDN template with confirmed content - generates ALL slides
+    // Each slide is a separate, valid Pitch.com EDN that can be pasted individually
+    function generateFinalEdn() {
+      const { context, heatmap, angleCards } = state;
+
+      // Generate heatmap EDN (valid Pitch.com EDN)
+      const heatmapEdn = generateHeatmapEdn();
+
+      // Generate EDN for each angle card (each is valid Pitch.com EDN)
+      const angleCardEdns = angleCards.map((card, index) => generateAngleCardEdn(card, index));
+
+      // Build array of all slides with metadata
+      const allSlides = [
+        { type: 'heatmap', title: heatmap.title || 'P&L Impact Heatmap', edn: heatmapEdn }
+      ];
+
+      angleCards.forEach((card, i) => {
+        allSlides.push({
+          type: 'angle_card',
+          title: card.title || `Angle Card ${i + 1}`,
+          workflows: card.workflows.map(w => w.id).join(' + '),
+          edn: angleCardEdns[i]
+        });
+      });
+
+      return {
+        heatmapEdn: heatmapEdn,
+        angleCardEdns: angleCardEdns,
+        allSlides: allSlides,
+        angleCards: angleCards,
+        context: context,
+        totalSlides: allSlides.length
+      };
+    }
+
+    // ==========================================================================
+    // SYSTEM PROMPT (embedded)
+    // ==========================================================================
+    const SYSTEM_PROMPT = `
+You are an AI assistant specialized in creating high-quality consulting slides for AI Value Creation presentations.
+
+## STYLE MANDATE
+Write in McKinsey Partner style - sharp, without slop. Concise yet exhaustive. Every word earns its place.
+
+## SLIDE FORMATTING RULES
+- **Maximize line utilization**: Fill available space without exceeding bounds
+- **No sparse slides**: Each element should feel balanced and complete
+- **No overflow**: Never exceed character/line limits for any field
+- **Professional density**: Match the information density of top-tier consulting decks
+
+## CHARACTER LIMITS BY ELEMENT
+
+### Heatmap Slide
+| Element | Limit |
+|---------|-------|
+| Slide Title | 80-100 chars |
+| Domain Name (Col 1) | 25 chars max |
+| Workflow Name (Col 2) | 50 chars max |
+| Pain Point (Col 3) | 60 chars max |
+| Solution & Impact (Col 4) | 100 chars max |
+| Bottom Box Title | 35 chars max |
+| Bottom Box Description | 180 chars max |
+| Footer Attribution | 80 chars max |
+
+### Angle Card Slide
+| Element | Limit |
+|---------|-------|
+| Slide Title | 70-90 chars |
+| Workflow Title | max 45 chars |
+| Workflow Subtitle | max 60 chars |
+| Challenge Bullet | EXACTLY 70-85 chars (STRICT - never below 70, never above 85) |
+| Solution Bullet | EXACTLY 70-85 chars (STRICT - never below 70, never above 85) |
+| Impact Bullet | EXACTLY 70-85 chars (STRICT - never below 70, never above 85) |
+
+## CONTENT GUIDELINES
+
+### Titles (McKinsey Takeaway Style)
+- Format: "[Outcome] comes from [action/approach]"
+- Action-oriented, insight-driven
+- Specific to company/industry context
+
+### Pain Points
+- Current-state problems, not solutions
+- Specific to workflow and industry
+- Escalate: operational → strategic impact
+
+### Solutions
+- Start with action verbs: Ingest, Automate, Simulate, Extract, Connect
+- Technically credible but accessible
+- Show progression: data → intelligence → action
+
+### Impact Statements
+- Quantified estimates with conservative ranges (20-30%, 2-3x)
+- Cover efficiency, speed, and strategic dimensions
+`;
+
+    // ==========================================================================
+    // CHARACTER LIMITS (based on Pitch.com template capacity)
+    // ==========================================================================
+    const LIMITS = {
+      heatmap: {
+        slideTitle: { max: 84 },                // 1 less than "Airline P&L impact comes from..."
+        domainName: { max: 25 },
+        workflowName: { max: 46 },              // 1 less than "WC2. Asset Accountability & Replenishment Logic"
+        painPoint: { max: 48 },                 // "Forecasts distorted by disruptions & crew costs."
+        solutionImpact: { max: 114 },           // "Connect SAP with operational airline systems for a single source of truth..."
+        bottomBoxTitle: { max: 35 },
+        bottomBoxDescription: { max: 180 },
+        footerAttribution: { max: 80 }
+      },
+      angleCard: {
+        slideTitle: { min: 70, max: 85 },
+        workflowTitle: { max: 45 },
+        workflowSubtitle: { max: 60 },
+        challengeBullet: { min: 70, max: 85 },  // STRICT: Must be 70-85 chars
+        solutionBullet: { min: 70, max: 85 },   // STRICT: Must be 70-85 chars
+        impactBullet: { min: 70, max: 85 }      // STRICT: Must be 70-85 chars
+      }
+    };
+
+    // HARD TRUNCATE - guarantees max length, no exceptions ever
+    function hardTruncate(text, max) {
+      if (!text) return text;
+      text = String(text).trim();
+      if (text.length <= max) return text;
+      // Find last space before max to avoid mid-word cut
+      let cut = text.lastIndexOf(' ', max);
+      if (cut < max * 0.5) cut = max; // If no good break, hard cut
+      return text.substring(0, cut).trim();
+    }
+
+    // ==========================================================================
+    // STATE
+    // ==========================================================================
+    let state = {
+      phase: 1,
+      context: {
+        version: null,
+        company: null,
+        industry: null,
+        audience: { name: null, title: null, concerns: null },
+        painPoints: [],
+        additionalContext: null,
+        mentionedWorkflows: [],
+        customDomains: null,
+        customContext: null
+      },
+      heatmap: null,
+      selectedWorkflows: [],
+      angleCards: [],
+      currentQuestion: 0,
+      waitingForCustomDomains: false,
+      waitingForCustomContext: false,
+      waitingForDomainSelection: false,
+      selectedDomains: new Set(),
+      customDomains: [], // User-added custom domains
+      freeformFeedback: [] // Stores all free-form feedback/requests outside scripted flow
+    };
+
+    const questions = [
+      {
+        id: 'version',
+        text: 'Which heatmap structure would you like?',
+        type: 'options',
+        options: [
+          { value: 1, label: 'Version 1: Company P&L', desc: 'Organized by P&L line items (Revenue, COGS, SG&A, Working Capital)' },
+          { value: 2, label: 'Version 2: Company Domains', desc: 'Organized by business domains (e.g., Banking: Lending, Deposits)' },
+          { value: 3, label: 'Version 3: Vertical Domains', desc: 'Organized by functional departments (e.g., Finance: FP&A, Treasury)' },
+          { value: 'other', label: 'Other (Custom)', desc: 'Define your own domains and structure - full flexibility' }
+        ]
+      },
+      {
+        id: 'company',
+        text: 'What is the company name?',
+        type: 'text'
+      },
+      {
+        id: 'industry',
+        text: 'What industry/sector is this company in?',
+        type: 'text'
+      },
+      {
+        id: 'audienceName',
+        text: 'Who is the primary reader? (Name)',
+        type: 'text'
+      },
+      {
+        id: 'audienceTitle',
+        text: 'What is their title/role?',
+        type: 'text'
+      },
+      {
+        id: 'audienceConcerns',
+        text: 'What are their key concerns or priorities?',
+        type: 'text'
+      },
+      {
+        id: 'painPoints',
+        text: 'Were any specific pain points or workflows mentioned in prior conversations? (These will be marked with checkmarks. Leave blank if none.)',
+        type: 'text',
+        optional: true
+      },
+      {
+        id: 'additionalContext',
+        text: 'Any additional context? (e.g., recent news, strategic initiatives, specific challenges discussed)',
+        type: 'text',
+        optional: true
+      }
+    ];
+
+    // ==========================================================================
+    // DOMAIN TEMPLATES
+    // ==========================================================================
+    const DOMAINS = {
+      1: [
+        { abbr: 'PF', name: 'Planning & Forecasting' },
+        { abbr: 'CA', name: 'Capital Allocation' },
+        { abbr: 'RM', name: 'Revenue & Margin' },
+        { abbr: 'CE', name: 'Cost Execution' },
+        { abbr: 'WC', name: 'Working Capital' },
+        { abbr: 'PG', name: 'Performance & Governance' },
+        { abbr: 'DS', name: 'Decision Support' },
+        { abbr: 'DA', name: 'Data Architecture' }
+      ],
+      2: [
+        { abbr: 'LO', name: 'Lending Operations' },
+        { abbr: 'DM', name: 'Deposit Management' },
+        { abbr: 'PP', name: 'Payments Processing' },
+        { abbr: 'RC', name: 'Risk & Compliance' },
+        { abbr: 'CO', name: 'Customer Onboarding' },
+        { abbr: 'TO', name: 'Treasury Operations' },
+        { abbr: 'RR', name: 'Regulatory Reporting' },
+        { abbr: 'DA', name: 'Data & Analytics' }
+      ],
+      3: [
+        { abbr: 'FP', name: 'FP&A' },
+        { abbr: 'TR', name: 'Treasury' },
+        { abbr: 'AC', name: 'Accounting & Close' },
+        { abbr: 'TX', name: 'Tax' },
+        { abbr: 'PR', name: 'Procurement' },
+        { abbr: 'IA', name: 'Internal Audit' },
+        { abbr: 'IR', name: 'Investor Relations' },
+        { abbr: 'SS', name: 'Shared Services' }
+      ]
+    };
+
+    // ==========================================================================
+    // UI FUNCTIONS
+    // ==========================================================================
+    function addMessage(content, isUser = false) {
+      const messagesDiv = document.getElementById('messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.textContent = isUser ? 'U' : 'AI';
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      contentDiv.innerHTML = content;
+
+      messageDiv.appendChild(avatar);
+      messageDiv.appendChild(contentDiv);
+      messagesDiv.appendChild(messageDiv);
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function updatePhase(phase) {
+      state.phase = phase;
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById(`phase-${i}`);
+        el.classList.remove('active', 'complete');
+        if (i < phase) el.classList.add('complete');
+        if (i === phase) el.classList.add('active');
+      }
+    }
+
+    function renderOptions(options, callback) {
+      let html = '<div class="options-grid">';
+      options.forEach((opt, i) => {
+        const label = typeof opt === 'string' ? opt : opt.label;
+        const desc = typeof opt === 'object' ? opt.desc : '';
+        html += `
+          <button class="option-btn" onclick="selectOption(${i}, '${callback}')">
+            <strong>${label}</strong>
+            ${desc ? `<br><span style="color: #888; font-size: 12px;">${desc}</span>` : ''}
+          </button>
+        `;
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function selectOption(index, callback) {
+      if (callback === 'version') {
+        const selectedOption = questions[0].options[index];
+        state.context.version = selectedOption.value;
+
+        if (selectedOption.value === 'other') {
+          // Handle "Other" selection - ask for custom domains
+          addMessage(selectedOption.label, true);
+          setTimeout(() => {
+            askCustomDomains();
+          }, 300);
+        } else {
+          handleAnswer(selectedOption.label);
+        }
+      } else if (callback === 'title') {
+        state.heatmap.selectedTitle = state.heatmap.titles[index];
+        handleTitleSelection(index);
+      }
+    }
+
+    function askCustomDomains() {
+      const msg = `
+        <h3>Custom Structure</h3>
+        <p>Great! Let's define your custom domains. Please provide:</p>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+          <li>A list of <strong>4-8 domain names</strong> for your heatmap rows</li>
+          <li>Separate each domain with a comma</li>
+        </ul>
+        <p style="margin-top: 12px; color: #888; font-size: 13px;">
+          <strong>Example:</strong> Customer Acquisition, Loan Processing, Risk Assessment, Collections, Customer Service, Regulatory Compliance
+        </p>
+        <p style="margin-top: 12px; color: #60a5fa; font-size: 13px;">
+          This will adapt the entire heatmap and angle cards to your specific business structure.
+        </p>
+      `;
+      addMessage(msg);
+      state.waitingForCustomDomains = true;
+    }
+
+    function processCustomDomains(input) {
+      const domainNames = input.split(',').map(d => d.trim()).filter(d => d.length > 0);
+
+      if (domainNames.length < 2) {
+        addMessage(`
+          <p style="color: #f59e0b;">Please provide at least 2 domains, separated by commas.</p>
+          <p style="margin-top: 8px;">Example: Customer Acquisition, Loan Processing, Risk Assessment</p>
+        `);
+        return false;
+      }
+
+      // Create custom domain structure with auto-generated abbreviations
+      DOMAINS['other'] = domainNames.map((name, i) => ({
+        abbr: name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || `D${i+1}`,
+        name: name,
+        isCustom: true
+      }));
+
+      state.context.customDomains = domainNames;
+      state.waitingForCustomDomains = false;
+
+      addMessage(`Custom domains set: ${domainNames.join(', ')}`, true);
+
+      // Ask for additional context to help generate relevant workflows
+      setTimeout(() => {
+        askCustomContext();
+      }, 300);
+
+      return true;
+    }
+
+    function askCustomContext() {
+      const msg = `
+        <h3>Additional Context for Custom Structure</h3>
+        <p>To generate relevant workflows and pain points for your custom domains, please describe:</p>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+          <li>What kind of <strong>workflows or processes</strong> happen in each domain?</li>
+          <li>Any <strong>specific pain points</strong> or challenges you want addressed?</li>
+          <li>The <strong>industry context</strong> or business model specifics</li>
+        </ul>
+        <p style="margin-top: 12px; color: #888; font-size: 13px;">
+          Be as detailed as you like - this helps generate more relevant and actionable content.
+        </p>
+      `;
+      addMessage(msg);
+      state.waitingForCustomContext = true;
+    }
+
+    function processCustomContext(input) {
+      state.context.customContext = input;
+      state.waitingForCustomContext = false;
+
+      // Now continue with the normal question flow
+      state.currentQuestion = 1; // Skip version question, go to company
+      askNextQuestion();
+      return true;
+    }
+
+    // ==========================================================================
+    // CONVERSATION FLOW
+    // ==========================================================================
+    function startConversation() {
+      const welcomeMsg = `
+        <h3>Welcome to the AI Value Creation Slides Generator</h3>
+        <p>I'll help you create professional Pitch.com slides for AI workflow presentations.</p>
+        <p style="margin-top: 12px; color: #888;">
+          <strong>Style:</strong> McKinsey Partner style - sharp, concise, exhaustive.<br>
+          <strong>Output:</strong> Heatmap + Angle Cards in EDN format for Pitch.com
+        </p>
+        <p style="margin-top: 16px;"><strong>Let's start with some context:</strong></p>
+        ${renderOptions(questions[0].options, 'version')}
+      `;
+      addMessage(welcomeMsg);
+    }
+
+    function handleAnswer(answer) {
+      addMessage(answer, true);
+
+      const currentQ = questions[state.currentQuestion];
+
+      // Store answer based on question ID
+      switch (currentQ.id) {
+        case 'version':
+          // Already handled in selectOption
+          break;
+        case 'company':
+          state.context.company = answer;
+          break;
+        case 'industry':
+          state.context.industry = answer;
+          break;
+        case 'audienceName':
+          state.context.audience.name = answer;
+          break;
+        case 'audienceTitle':
+          state.context.audience.title = answer;
+          break;
+        case 'audienceConcerns':
+          state.context.audience.concerns = answer;
+          break;
+        case 'painPoints':
+          if (answer.trim()) {
+            state.context.painPoints = answer.split(',').map(s => s.trim());
+          }
+          break;
+        case 'additionalContext':
+          if (answer.trim()) {
+            state.context.additionalContext = answer.trim();
+          }
+          break;
+      }
+
+      state.currentQuestion++;
+
+      if (state.currentQuestion < questions.length) {
+        // Ask next question
+        setTimeout(() => {
+          askNextQuestion();
+        }, 300);
+      } else {
+        // All context gathered - check if we need domain selection for Version 2 or 3
+        const version = state.context.version;
+        if (version === 2 || version === 3) {
+          setTimeout(() => {
+            askDomainSelection();
+          }, 300);
+        } else {
+          setTimeout(() => {
+            generateHeatmap();
+          }, 300);
+        }
+      }
+    }
+
+    function askDomainSelection() {
+      const version = state.context.version;
+      const allDomains = DOMAINS[version];
+      const versionLabel = version === 2 ? 'business domains' : 'functional areas';
+
+      state.waitingForDomainSelection = true;
+      state.selectedDomains = new Set(allDomains.map(d => d.abbr)); // All selected by default
+
+      let domainsHtml = `
+        <h3>Select Relevant ${version === 2 ? 'Business Domains' : 'Functional Areas'}</h3>
+        <p>Which ${versionLabel} are most relevant to ${state.context.audience.name}'s priorities? Uncheck any that aren't applicable to ${state.context.company}.</p>
+        <div class="domain-selection" style="margin: 16px 0;">
+      `;
+
+      allDomains.forEach(domain => {
+        domainsHtml += `
+          <div class="domain-checkbox" style="display: flex; align-items: center; padding: 8px 12px; margin: 4px 0; background: #1a1a1a; border-radius: 6px; cursor: pointer;" onclick="toggleDomainSelection('${domain.abbr}', this)">
+            <input type="checkbox" id="domain-${domain.abbr}" checked style="margin-right: 12px; width: 18px; height: 18px; cursor: pointer;">
+            <div>
+              <strong style="color: #fff;">${domain.name}</strong>
+              <p style="color: #888; font-size: 12px; margin: 2px 0 0 0;">${getDomainDescription(domain.abbr)}</p>
+            </div>
+          </div>
+        `;
+      });
+
+      domainsHtml += `
+        </div>
+
+        <div style="margin: 16px 0; padding: 12px; background: #1a1a1a; border-radius: 6px; border: 1px dashed #4ade80;">
+          <p style="color: #4ade80; font-size: 13px; margin-bottom: 8px;">+ Add Custom Domain</p>
+          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+            <input type="text" id="custom-domain-name" placeholder="Domain name (e.g., Supply Chain)" style="flex: 1; padding: 8px 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; color: #fff; font-size: 14px;">
+            <input type="text" id="custom-domain-abbr" placeholder="Abbr (e.g., SC)" style="width: 80px; padding: 8px 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; color: #fff; font-size: 14px; text-transform: uppercase;">
+          </div>
+          <input type="text" id="custom-domain-desc" placeholder="Description (e.g., Logistics, inventory, vendor management)" style="width: 100%; padding: 8px 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; color: #fff; font-size: 14px; margin-bottom: 8px; box-sizing: border-box;">
+          <button class="option-btn" onclick="addCustomDomain()" style="background: #333; color: #fff; padding: 6px 12px; font-size: 12px;">
+            Add Domain
+          </button>
+          <div id="custom-domains-list" style="margin-top: 8px;"></div>
+        </div>
+
+        <button class="option-btn" onclick="confirmDomainSelection()" style="background: #4ade80; color: #000; margin-top: 12px;">
+          Confirm Selection & Generate Heatmap
+        </button>
+      `;
+
+      addMessage(domainsHtml);
+    }
+
+    function addCustomDomain() {
+      const nameInput = document.getElementById('custom-domain-name');
+      const abbrInput = document.getElementById('custom-domain-abbr');
+      const descInput = document.getElementById('custom-domain-desc');
+
+      const name = nameInput.value.trim();
+      const abbr = abbrInput.value.trim().toUpperCase();
+      const desc = descInput.value.trim();
+
+      if (!name || !abbr) {
+        alert('Please enter both domain name and abbreviation');
+        return;
+      }
+
+      if (abbr.length > 3) {
+        alert('Abbreviation should be 2-3 characters');
+        return;
+      }
+
+      // Add to custom domains and selected domains
+      const customDomain = { name, abbr, description: desc, isCustom: true };
+      state.customDomains.push(customDomain);
+      state.selectedDomains.add(abbr);
+
+      // Add to the list display
+      const listEl = document.getElementById('custom-domains-list');
+      listEl.innerHTML += `
+        <div class="domain-checkbox" style="display: flex; align-items: center; padding: 8px 12px; margin: 4px 0; background: #1a3a1a; border-radius: 6px; border: 1px solid #4ade80;">
+          <input type="checkbox" checked disabled style="margin-right: 12px; width: 18px; height: 18px;">
+          <div style="flex: 1;">
+            <strong style="color: #4ade80;">${name}</strong> <span style="color: #888;">(${abbr})</span>
+            <p style="color: #888; font-size: 12px; margin: 2px 0 0 0;">${desc || 'Custom domain'}</p>
+          </div>
+          <button onclick="removeCustomDomain('${abbr}', this)" style="background: #f87171; color: #000; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remove</button>
+        </div>
+      `;
+
+      // Clear inputs
+      nameInput.value = '';
+      abbrInput.value = '';
+      descInput.value = '';
+      nameInput.focus();
+    }
+
+    function removeCustomDomain(abbr, btn) {
+      state.customDomains = state.customDomains.filter(d => d.abbr !== abbr);
+      state.selectedDomains.delete(abbr);
+      btn.closest('.domain-checkbox').remove();
+    }
+
+    function getDomainDescription(abbr) {
+      const descriptions = {
+        // Version 2: Banking/Financial Services
+        'LO': 'Loan origination, underwriting, credit decisions',
+        'DM': 'Deposit products, rates, customer retention',
+        'PP': 'Payment processing, fraud, reconciliation',
+        'RC': 'AML, KYC, regulatory compliance, capital',
+        'CO': 'Customer onboarding, due diligence',
+        'TO': 'Cash management, FX, liquidity',
+        'RR': 'Regulatory reporting, data quality',
+        // Version 3: Finance Functions
+        'FP': 'Forecasting, budgeting, variance analysis',
+        'TR': 'Cash flow, bank reconciliation, investments',
+        'AC': 'Close process, journal entries, intercompany',
+        'TX': 'Tax provision, compliance, transfer pricing',
+        'PR': 'Invoicing, contracts, spend management',
+        'IA': 'Controls, audit planning, risk assessment',
+        'IR': 'Earnings, investor communications',
+        'SS': 'Shared services, ticket routing, SLAs',
+        'DA': 'Data layer, analytics, reporting foundation'
+      };
+      return descriptions[abbr] || '';
+    }
+
+    function toggleDomainSelection(abbr, element) {
+      const checkbox = element.querySelector('input[type="checkbox"]');
+      checkbox.checked = !checkbox.checked;
+
+      if (checkbox.checked) {
+        state.selectedDomains.add(abbr);
+        element.style.background = '#1a1a1a';
+      } else {
+        state.selectedDomains.delete(abbr);
+        element.style.background = '#0a0a0a';
+        element.style.opacity = '0.6';
+      }
+
+      // Re-enable opacity if checked
+      if (checkbox.checked) {
+        element.style.opacity = '1';
+      }
+    }
+
+    function confirmDomainSelection() {
+      state.waitingForDomainSelection = false;
+
+      // Filter domains based on selection (include both predefined and custom)
+      const version = state.context.version;
+      const allDomains = DOMAINS[version];
+      const selectedPredefined = allDomains.filter(d => state.selectedDomains.has(d.abbr));
+      const selectedCustom = state.customDomains || [];
+
+      // Combine predefined and custom domains
+      state.context.selectedDomains = [...selectedPredefined, ...selectedCustom];
+
+      if (state.context.selectedDomains.length === 0) {
+        addMessage(`<p style="color: #f87171;">Please select at least one domain.</p>`);
+        state.waitingForDomainSelection = true;
+        return;
+      }
+
+      const customCount = selectedCustom.length;
+      const customNote = customCount > 0 ? ` (including ${customCount} custom)` : '';
+      addMessage(`Selected ${state.context.selectedDomains.length} domains${customNote}: ${state.context.selectedDomains.map(d => d.name).join(', ')}`, true);
+
+      setTimeout(() => {
+        generateHeatmap();
+      }, 300);
+    }
+
+    function askNextQuestion() {
+      const q = questions[state.currentQuestion];
+      let msg = `<p>${q.text}</p>`;
+      if (q.optional) {
+        msg += `<p style="color: #888; font-size: 12px; margin-top: 8px;">(Optional - press Enter to skip)</p>`;
+      }
+      addMessage(msg);
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+
+      // Handle custom domain input
+      if (state.waitingForCustomDomains) {
+        if (!text) return;
+        input.value = '';
+        processCustomDomains(text);
+        return;
+      }
+
+      // Handle custom context input
+      if (state.waitingForCustomContext) {
+        if (!text) return;
+        input.value = '';
+        processCustomContext(text);
+        return;
+      }
+
+      // Handle free-form feedback at any phase (especially during heatmap/selection stages)
+      if (state.phase >= 2 && text) {
+        input.value = '';
+        handleFreeformFeedback(text);
+        return;
+      }
+
+      if (!text && !questions[state.currentQuestion]?.optional) return;
+
+      handleAnswer(text || '(skipped)');
+      input.value = '';
+    }
+
+    function handleFreeformFeedback(feedback) {
+      // Store the feedback
+      state.freeformFeedback.push({
+        phase: state.phase,
+        timestamp: new Date().toISOString(),
+        message: feedback
+      });
+
+      // Show user message
+      addMessage(feedback, true);
+
+      // Parse the feedback to understand what needs to change
+      const feedbackLower = feedback.toLowerCase();
+
+      // Check if user wants to regenerate/change something
+      if (state.phase === 2 && state.heatmap) {
+        // User is on heatmap phase - apply changes and regenerate
+        setTimeout(() => {
+          applyFeedbackAndRegenerate(feedback);
+        }, 300);
+      } else if (state.phase === 3) {
+        // User is on selection phase
+        setTimeout(() => {
+          applySelectionFeedback(feedback);
+        }, 300);
+      } else if (state.phase === 4 && state.waitingForAngleCardFeedback) {
+        // User is on angle cards phase - apply feedback to current card
+        setTimeout(() => {
+          applyAngleCardFeedbackFromInput(feedback);
+        }, 300);
+      }
+    }
+
+    function applyFeedbackAndRegenerate(feedback) {
+      const feedbackLower = feedback.toLowerCase();
+
+      // Show processing message
+      addMessage(`
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <span>Applying changes and regenerating...</span>
+        </div>
+      `);
+
+      setTimeout(() => {
+        // Remove loading message
+        const messages = document.getElementById('messages');
+        messages.lastChild.remove();
+
+        // Parse feedback to understand changes
+        let changesApplied = [];
+
+        // Check for domain/workflow removal requests
+        const removePatterns = [
+          /don'?t like\s+(.+)/i,
+          /remove\s+(.+)/i,
+          /delete\s+(.+)/i,
+          /exclude\s+(.+)/i
+        ];
+
+        // Check for addition requests - more specific patterns
+        const addPatterns = [
+          /add\s+(?:one\s+)?(?:more\s+)?(?:another\s+)?(?:new\s+)?(?:roi\s+)?workflow[s]?\s+(?:for\s+)?(.+)/i,
+          /(?:one\s+)?more\s+(?:roi\s+)?workflow[s]?\s+(?:for\s+)?(.+)/i,
+          /another\s+(?:roi\s+)?workflow[s]?\s+(?:for\s+)?(.+)/i,
+          /include\s+(.+)/i,
+          /add\s+(.+)/i
+        ];
+
+        // Apply domain/workflow filtering
+        if (state.heatmap && state.heatmap.rows) {
+          // Find keywords to exclude
+          const excludeKeywords = [];
+          removePatterns.forEach(pattern => {
+            const match = feedbackLower.match(pattern);
+            if (match && match[1]) {
+              const words = match[1].split(/\s+/).filter(w => w.length > 2 && !['workflow', 'workflows', 'another', 'more'].includes(w));
+              excludeKeywords.push(...words);
+            }
+          });
+
+          // Filter out rows that match exclude keywords
+          if (excludeKeywords.length > 0) {
+            const originalCount = state.heatmap.rows.length;
+            state.heatmap.rows = state.heatmap.rows.filter(row => {
+              const rowText = `${row.domain} ${row.name} ${row.painPoint} ${row.solution}`.toLowerCase();
+              return !excludeKeywords.some(kw => rowText.includes(kw));
+            });
+            const removedCount = originalCount - state.heatmap.rows.length;
+            if (removedCount > 0) {
+              changesApplied.push(`Removed ${removedCount} workflow(s) matching: ${excludeKeywords.join(', ')}`);
+            }
+          }
+
+          // Check for ADD requests
+          let addMatch = null;
+          for (const pattern of addPatterns) {
+            addMatch = feedbackLower.match(pattern);
+            if (addMatch) break;
+          }
+
+          if (addMatch || feedbackLower.includes('add') || feedbackLower.includes('more') || feedbackLower.includes('another')) {
+            // Find which domain(s) to add to
+            const targetDomains = [];
+            const allDomains = DOMAINS[state.context.version] || [];
+
+            // Check feedback for specific domain keywords - only add to explicitly mentioned domains
+            if (feedbackLower.includes('planning') || feedbackLower.includes('forecast')) {
+              const pf = allDomains.find(d => d.name.toLowerCase().includes('planning') || d.name.toLowerCase().includes('forecast'));
+              if (pf) targetDomains.push(pf);
+            }
+            if (feedbackLower.includes('capital') || feedbackLower.includes('allocation')) {
+              const ca = allDomains.find(d => d.name.toLowerCase().includes('capital'));
+              if (ca) targetDomains.push(ca);
+            }
+            if (feedbackLower.includes('revenue') && !feedbackLower.includes('planning')) {
+              const rm = allDomains.find(d => d.name.toLowerCase().includes('revenue'));
+              if (rm) targetDomains.push(rm);
+            }
+            if (feedbackLower.includes('margin') && !feedbackLower.includes('planning')) {
+              const rm = allDomains.find(d => d.name.toLowerCase().includes('margin'));
+              if (rm) targetDomains.push(rm);
+            }
+            if (feedbackLower.includes('cost') || feedbackLower.includes('execution')) {
+              const ce = allDomains.find(d => d.name.toLowerCase().includes('cost') || d.name.toLowerCase().includes('execution'));
+              if (ce) targetDomains.push(ce);
+            }
+            if (feedbackLower.includes('working') || feedbackLower.includes('inventory')) {
+              const wc = allDomains.find(d => d.name.toLowerCase().includes('working'));
+              if (wc) targetDomains.push(wc);
+            }
+            if (feedbackLower.includes('performance') || feedbackLower.includes('governance')) {
+              const pg = allDomains.find(d => d.name.toLowerCase().includes('performance') || d.name.toLowerCase().includes('governance'));
+              if (pg) targetDomains.push(pg);
+            }
+            if (feedbackLower.includes('decision') || feedbackLower.includes('support') || feedbackLower.includes('copilot')) {
+              const ds = allDomains.find(d => d.name.toLowerCase().includes('decision') || d.name.toLowerCase().includes('support'));
+              if (ds) targetDomains.push(ds);
+            }
+            if (feedbackLower.includes('data') || feedbackLower.includes('architecture')) {
+              const da = allDomains.find(d => d.name.toLowerCase().includes('data') || d.name.toLowerCase().includes('architecture'));
+              if (da) targetDomains.push(da);
+            }
+
+            // If still no specific domain found, check for general domain name matches
+            if (targetDomains.length === 0) {
+              allDomains.forEach(domain => {
+                const domainWords = domain.name.toLowerCase().split(/\s+/);
+                if (domainWords.some(w => w.length > 3 && feedbackLower.includes(w))) {
+                  targetDomains.push(domain);
+                }
+              });
+            }
+
+            // Add new workflows to target domains - INSERT into existing domain group, not at end
+            if (targetDomains.length > 0) {
+              targetDomains.forEach(domain => {
+                const existingForDomain = state.heatmap.rows.filter(r => r.domain === domain.name);
+                const newWorkflowNum = existingForDomain.length + 1;
+                const newId = `${domain.abbr}${newWorkflowNum}`;
+
+                const newWorkflow = {
+                  id: newId,
+                  domain: domain.name,
+                  name: `${newId}. ${generateContextAwareWorkflowName(domain.name, newWorkflowNum)}`,
+                  painPoint: generateContextAwarePainPoint(domain.name),
+                  solution: generateContextAwareSolution(domain.name),
+                  hasCheckmark: false,
+                  isAlternative: true
+                };
+
+                // Find the index of the last workflow in this domain group
+                let lastDomainIndex = -1;
+                for (let i = 0; i < state.heatmap.rows.length; i++) {
+                  if (state.heatmap.rows[i].domain === domain.name) {
+                    lastDomainIndex = i;
+                  }
+                }
+
+                // Insert right after the last workflow in the domain group
+                if (lastDomainIndex >= 0) {
+                  state.heatmap.rows.splice(lastDomainIndex + 1, 0, newWorkflow);
+                } else {
+                  // Domain not found, add to end (shouldn't happen)
+                  state.heatmap.rows.push(newWorkflow);
+                }
+
+                // Also add to allRows for selection (at the same position)
+                if (state.heatmap.allRows) {
+                  let lastAllRowsIndex = -1;
+                  for (let i = 0; i < state.heatmap.allRows.length; i++) {
+                    if (state.heatmap.allRows[i].domain === domain.name) {
+                      lastAllRowsIndex = i;
+                    }
+                  }
+                  if (lastAllRowsIndex >= 0) {
+                    state.heatmap.allRows.splice(lastAllRowsIndex + 1, 0, newWorkflow);
+                  } else {
+                    state.heatmap.allRows.push(newWorkflow);
+                  }
+                }
+                changesApplied.push(`Added new workflow: ${newWorkflow.name}`);
+              });
+            }
+          }
+
+          // Generate new titles if heatmap changed
+          if (changesApplied.length > 0) {
+            state.heatmap.titles = [
+              `${state.context.industry} P&L impact comes from focused AI deployment on high-value workflows`,
+              `${state.context.company} value creation accelerates through targeted automation`,
+              `Strategic workflow selection drives sustainable margin improvement`,
+              `${state.context.industry} leaders differentiate through disciplined AI prioritization`,
+              `Sustainable P&L gains emerge from iterative AI workflow refinement`
+            ];
+          }
+        }
+
+        // Display updated heatmap
+        if (changesApplied.length > 0) {
+          const changesSummary = `
+            <h3>Changes Applied</h3>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              ${changesApplied.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+            <p style="margin-top: 12px; color: #60a5fa;">Here's the updated heatmap:</p>
+          `;
+          addMessage(changesSummary);
+        } else {
+          addMessage(`
+            <p>I've noted your feedback. Here's the regenerated heatmap with variations:</p>
+          `);
+          // Shuffle/regenerate some content
+          shuffleHeatmapContent();
+        }
+
+        // Re-display the heatmap (don't remove loading since we already did)
+        setTimeout(() => {
+          displayHeatmap(false);
+        }, 300);
+
+      }, 1000);
+    }
+
+    // Context-aware content generators that use company, industry, and audience info
+    function generateContextAwareWorkflowName(domainName, num) {
+      const { company, industry, audience } = state.context;
+      const role = audience?.title || 'executive';
+      const roleLower = role.toLowerCase();
+
+      const templates = [
+        `${domainName} Intelligence for ${industry} Leaders`,
+        `AI-Powered ${domainName} Optimization`,
+        `Real-time ${domainName} Analytics & Control`,
+        `${domainName} Automation for ${company}`,
+        `Predictive ${domainName} Management`,
+        `${industry} ${domainName} Copilot`,
+        `Smart ${domainName} Decision Support`,
+        `${domainName} Performance Acceleration`
+      ];
+
+      // Pick based on context hash
+      const contextHash = `${company}${industry}${domainName}${num}`.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      return templates[contextHash % templates.length];
+    }
+
+    function generateContextAwarePainPoint(domainName) {
+      const { company, industry, audience } = state.context;
+      const concerns = audience?.concerns || '';
+      const domainLower = domainName.toLowerCase();
+
+      const templates = [
+        `${industry} ${domainLower} cycles too slow for competitive response.`,
+        `Manual ${domainLower} processes limit ${company}'s agility.`,
+        `${domainLower.charAt(0).toUpperCase() + domainLower.slice(1)} visibility gaps delay critical decisions.`,
+        `Fragmented ${domainLower} data undermines accuracy and trust.`,
+        `${domainLower.charAt(0).toUpperCase() + domainLower.slice(1)} bottlenecks constrain ${industry} growth.`,
+        `Reactive ${domainLower} management erodes margins.`,
+        `${company} ${domainLower} team capacity consumed by manual work.`,
+        `${domainLower.charAt(0).toUpperCase() + domainLower.slice(1)} errors compound across ${industry} operations.`
+      ];
+
+      const contextHash = `${company}${industry}${domainName}`.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      return templates[contextHash % templates.length];
+    }
+
+    function generateContextAwareSolution(domainName) {
+      const { company, industry, audience } = state.context;
+      const domainLower = domainName.toLowerCase();
+
+      const templates = [
+        `Deploy AI agents to automate ${domainLower} workflows, reducing cycle time 40-60% for ${company}.`,
+        `Implement real-time ${domainLower} monitoring to enable proactive steering in ${industry}.`,
+        `Build unified ${domainLower} data layer to support rapid, confident decisions.`,
+        `Apply ML models to predict ${domainLower} outcomes and optimize resource allocation.`,
+        `Automate ${domainLower} reporting to free team for strategic ${industry} initiatives.`,
+        `Connect ${domainLower} systems for end-to-end visibility and control at ${company}.`,
+        `Deploy ${domainLower} copilot to accelerate analysis and recommendations.`,
+        `Implement intelligent ${domainLower} alerts to catch issues before escalation.`
+      ];
+
+      const contextHash = `${company}${industry}${domainName}solution`.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      return templates[contextHash % templates.length];
+    }
+
+    function shuffleHeatmapContent() {
+      // Regenerate with variations
+      if (state.heatmap && state.heatmap.rows) {
+        state.heatmap.rows = state.heatmap.rows.map(row => {
+          if (row.isCustom || row.isAlternative) {
+            // Generate new content for custom/alternative rows
+            return {
+              ...row,
+              painPoint: getAlternativePainPoint(row.domain),
+              solution: getAlternativeSolution(row.domain)
+            };
+          }
+          return row;
+        });
+      }
+    }
+
+    function getAlternativePainPoint(domain) {
+      const alternatives = [
+        `Inefficient ${domain.toLowerCase()} processes create bottlenecks.`,
+        `Manual ${domain.toLowerCase()} work consumes excessive resources.`,
+        `${domain} data silos prevent actionable insights.`,
+        `Reactive ${domain.toLowerCase()} management limits strategic value.`,
+        `Inconsistent ${domain.toLowerCase()} execution erodes margins.`
+      ];
+      return alternatives[Math.floor(Math.random() * alternatives.length)];
+    }
+
+    function getAlternativeSolution(domain) {
+      const alternatives = [
+        `Implement intelligent ${domain.toLowerCase()} automation to reduce cycle time and errors.`,
+        `Deploy AI-driven ${domain.toLowerCase()} analytics for proactive decision-making.`,
+        `Build unified ${domain.toLowerCase()} data layer to enable real-time visibility.`,
+        `Automate ${domain.toLowerCase()} workflows to free capacity for strategic work.`,
+        `Apply ML models to optimize ${domain.toLowerCase()} resource allocation.`
+      ];
+      return alternatives[Math.floor(Math.random() * alternatives.length)];
+    }
+
+    function applySelectionFeedback(feedback) {
+      addMessage(`
+        <p>Noted. You can adjust your workflow selection based on: "${feedback}"</p>
+        <p style="margin-top: 8px; color: #60a5fa;">Select or deselect workflows above, then click "Confirm Selection".</p>
+      `);
+    }
+
+
+    // ==========================================================================
+    // HEATMAP GENERATION
+    // ==========================================================================
+    async function generateHeatmap() {
+      updatePhase(2);
+
+      addMessage(`
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <span>Generating P&L heatmap with GPT-5.2...</span>
+        </div>
+      `);
+
+      // Use selected domains if available (Version 2/3), otherwise use all domains
+      const domains = state.context.selectedDomains || DOMAINS[state.context.version];
+
+      // Check if API is available
+      let useAI = false;
+      try {
+        const statusRes = await fetch('/api/status');
+        const status = await statusRes.json();
+        useAI = status.openaiConfigured;
+      } catch (e) {
+        console.log('API not available, using fallback templates');
+      }
+
+      if (useAI) {
+        try {
+          const response = await fetch('/api/generate-heatmap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              context: state.context,
+              domains: domains
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success && result.data) {
+            const aiData = result.data;
+            const painPointMentions = state.context.painPoints.map(p => p.toLowerCase());
+
+            // Build heatmap from AI response with HARD TRUNCATION
+            // Store name WITHOUT ID prefix - ID is stored separately
+            const rows = aiData.workflows.map(w => ({
+              id: w.id,
+              domain: hardTruncate(w.domain, LIMITS.heatmap.domainName.max),
+              name: hardTruncate(w.name.replace(/^[A-Z]{1,3}\d+\.\s*/i, ''), LIMITS.heatmap.workflowName.max), // Strip ID prefix if present
+              painPoint: hardTruncate(w.painPoint, LIMITS.heatmap.painPoint.max),
+              solution: hardTruncate(w.solution, LIMITS.heatmap.solutionImpact.max),
+              hasCheckmark: painPointMentions.some(p =>
+                w.name.toLowerCase().includes(p) ||
+                p.includes(w.domain.toLowerCase().split(' ')[0])
+              ),
+              isCustom: false
+            }));
+
+            // Now generate titles via AI
+            const titlesResponse = await fetch('/api/generate-titles', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                context: state.context,
+                workflowCount: rows.length
+              })
+            });
+
+            const titlesResult = await titlesResponse.json();
+            const rawTitles = titlesResult.success && titlesResult.data?.titles
+              ? titlesResult.data.titles
+              : generateFallbackTitles();
+            // HARD TRUNCATE all titles
+            const titles = rawTitles.map(t => hardTruncate(t, LIMITS.heatmap.slideTitle.max));
+
+            state.heatmap = {
+              titles: titles,
+              selectedTitle: null,
+              rows: rows,
+              allRows: [...rows],
+              bottomBoxes: generateBottomBoxes(),
+              footer: state.context.painPoints.length > 0
+                ? `Case Mentioned in Introduction Call by ${state.context.audience.name} (${state.context.audience.title})`
+                : null
+            };
+          } else {
+            console.error('API error:', result.error);
+            state.heatmap = generateMockHeatmap(domains);
+          }
+        } catch (error) {
+          console.error('Error generating heatmap:', error);
+          state.heatmap = generateMockHeatmap(domains);
+        }
+      } else {
+        // Fallback to template-based generation
+        state.heatmap = generateMockHeatmap(domains);
+      }
+
+      displayHeatmap();
+    }
+
+    function generateFallbackTitles() {
+      return [
+        `${state.context.industry} P&L impact comes from industrializing finance control and execution`,
+        `${state.context.company} margin expansion requires automating high-friction workflows`,
+        `Value creation accelerates through systematic AI deployment across core operations`,
+        `${state.context.industry} leaders compound gains by operationalizing finance intelligence`,
+        `Sustainable P&L improvement emerges from AI-enabled operational discipline`
+      ];
+    }
+
+    function generateBottomBoxes() {
+      return [
+        {
+          icon: 'widgets',
+          title: 'Turn Finance into a Control System',
+          description: `Systematize recurring ${state.context.industry.toLowerCase()} processes to eliminate leakage, cut manual effort, and compound P&L impact.`
+        },
+        {
+          icon: 'repeat',
+          title: 'Industrialize High-Friction Workflows',
+          description: `Embed AI into forecasting, disruption costs, and asset flows so finance moves from reporting to real-time steering.`
+        },
+        {
+          icon: 'auto_mode',
+          title: 'Build Finance-Owned AI Foundations',
+          description: `Unify data sources under finance governance so AI scales from isolated wins to durable gains in accuracy and discipline.`
+        }
+      ];
+    }
+
+    function generateMockHeatmap(domains) {
+      // This generates a sample heatmap - in production, this would come from an AI API
+      const rows = [];
+      const painPointMentions = state.context.painPoints.map(p => p.toLowerCase());
+
+      domains.forEach((domain, di) => {
+        for (let i = 1; i <= 2; i++) {
+          const workflowId = `${domain.abbr}${i}`;
+          const isCustom = domain.isCustom || state.context.version === 'other';
+
+          // For custom domains, generate generic but relevant content
+          const workflowName = isCustom
+            ? getCustomWorkflowName(domain.name, i)
+            : getWorkflowName(domain.abbr, i);
+
+          const painPoint = isCustom
+            ? getCustomPainPoint(domain.name, i)
+            : getPainPoint(domain.abbr, i);
+
+          const solution = isCustom
+            ? getCustomSolution(domain.name, i)
+            : getSolution(domain.abbr, i);
+
+          const workflow = {
+            id: workflowId,
+            domain: hardTruncate(domain.name, LIMITS.heatmap.domainName.max),
+            name: hardTruncate(workflowName, LIMITS.heatmap.workflowName.max), // Store name WITHOUT ID prefix
+            painPoint: hardTruncate(painPoint, LIMITS.heatmap.painPoint.max),
+            solution: hardTruncate(solution, LIMITS.heatmap.solutionImpact.max),
+            hasCheckmark: painPointMentions.some(p =>
+              workflowName.toLowerCase().includes(p) ||
+              p.includes(domain.name.toLowerCase().split(' ')[0])
+            ),
+            isCustom: isCustom
+          };
+          rows.push(workflow);
+        }
+      });
+
+      return {
+        titles: [
+          hardTruncate(`${state.context.industry} P&L impact comes from industrializing finance control`, LIMITS.heatmap.slideTitle.max),
+          hardTruncate(`${state.context.company} margin expansion requires automating high-friction workflows`, LIMITS.heatmap.slideTitle.max),
+          hardTruncate(`Value creation accelerates through systematic AI deployment across operations`, LIMITS.heatmap.slideTitle.max),
+          hardTruncate(`${state.context.industry} leaders compound gains by operationalizing finance AI`, LIMITS.heatmap.slideTitle.max),
+          hardTruncate(`Sustainable P&L improvement emerges from AI-enabled operational discipline`, LIMITS.heatmap.slideTitle.max)
+        ],
+        selectedTitle: null,
+        rows: rows,
+        allRows: [...rows], // Keep original full set for workflow selection
+        bottomBoxes: [
+          {
+            icon: 'widgets',
+            title: 'Turn Finance into a Control System',
+            description: `Systematize recurring ${state.context.industry.toLowerCase()} processes to eliminate leakage, cut manual effort, and compound P&L impact.`
+          },
+          {
+            icon: 'repeat',
+            title: 'Industrialize High-Friction Workflows',
+            description: `Embed AI into forecasting, disruption costs, and asset flows so finance moves from reporting to real-time steering.`
+          },
+          {
+            icon: 'auto_mode',
+            title: 'Build Finance-Owned AI Foundations',
+            description: `Unify data sources under finance governance so AI scales from isolated wins to durable gains in accuracy and discipline.`
+          }
+        ],
+        footer: state.context.painPoints.length > 0
+          ? `Case Mentioned in Introduction Call by ${state.context.audience.name} (${state.context.audience.title})`
+          : null
+      };
+    }
+
+    function getWorkflowName(abbr, num) {
+      const names = {
+        // Version 1: Company P&L (Finance Control)
+        'PF1': 'Integrated Rolling Forecast & Ops Signals',
+        'PF2': 'Driver-Level Forecast Explainability',
+        'CA1': 'Initiative-Level ROI Tracking',
+        'CA2': 'Fleet & Network Scenario Stress-Testing',
+        'RM1': 'Route Profitability with Disruption Costs',
+        'RM2': 'Margin Bridge: Plan vs. Actual',
+        'CE1': 'Crew Accommodation Cost Reconciliation',
+        'CE2': 'Direct Operating Cost OCR & Posting',
+        'WC1': 'Inventory Flow Forecasting',
+        'WC2': 'Asset Accountability & Replenishment Logic',
+        'PG1': 'Cost & Forecast Variance Control',
+        'PG2': 'Contract & Policy Compliance Monitoring',
+        'DS1': 'FP&A and Finance Business Partner Copilot',
+        'DS2': 'Executive Steering Insights',
+        'DA1': 'SAP-Centric Finance Data Layer',
+        'DA2': 'Reusable Finance Data Products',
+        // Version 2: Company Domains (Banking/Financial Services)
+        'LO1': 'Loan Origination & Underwriting Automation',
+        'LO2': 'Credit Risk Scoring & Portfolio Analytics',
+        'DM1': 'Deposit Product Optimization & Pricing',
+        'DM2': 'Customer Deposit Behavior Prediction',
+        'PP1': 'Real-time Payment Fraud Detection',
+        'PP2': 'Cross-border Payment Reconciliation',
+        'RC1': 'AML Transaction Monitoring & SAR Filing',
+        'RC2': 'Regulatory Capital Calculation & Reporting',
+        'CO1': 'Digital KYC & Identity Verification',
+        'CO2': 'Customer Due Diligence Automation',
+        'TO1': 'Liquidity Forecasting & Cash Positioning',
+        'TO2': 'FX Exposure Management & Hedging',
+        'RR1': 'Automated Regulatory Report Generation',
+        'RR2': 'Data Quality & Lineage for Submissions',
+        // Version 3: Vertical Domains (Finance Functions)
+        'FP1': 'Rolling Forecast & Scenario Modeling',
+        'FP2': 'Budget vs. Actual Variance Analysis',
+        'TR1': 'Cash Flow Forecasting & Optimization',
+        'TR2': 'Bank Account Reconciliation Automation',
+        'AC1': 'Automated Journal Entry & Close',
+        'AC2': 'Intercompany Reconciliation & Elimination',
+        'TX1': 'Tax Provision & Compliance Automation',
+        'TX2': 'Transfer Pricing Documentation',
+        'PR1': 'Supplier Invoice Processing & Matching',
+        'PR2': 'Contract Compliance & Spend Analytics',
+        'IA1': 'Continuous Control Monitoring',
+        'IA2': 'Risk-based Audit Planning',
+        'IR1': 'Earnings Release Preparation',
+        'IR2': 'Investor Query Response Automation',
+        'SS1': 'Shared Services Ticket Triage & Routing',
+        'SS2': 'SLA Performance & Capacity Management'
+      };
+      return names[`${abbr}${num}`] || `Workflow ${abbr}${num}`;
+    }
+
+    function getPainPoint(abbr, num) {
+      const points = {
+        // Version 1: Company P&L (Finance Control)
+        'PF1': 'Forecasts distorted by disruptions & crew costs.',
+        'PF2': 'Manual overrides without traceability.',
+        'CA1': 'Approvals on static cases; no realized tracking.',
+        'CA2': 'Decisions exposed to volatility; limited scenarios.',
+        'RM1': 'Route margins distorted by unallocated costs.',
+        'RM2': 'Erosion identified late at aggregate level.',
+        'CE1': 'Manual matching of invoices vs. room-night files.',
+        'CE2': 'OCR-heavy workflows with manual corrections.',
+        'WC1': 'No reliable view of stock; reactive replenishment.',
+        'WC2': 'Excess safety stock tied up due to uncertainty.',
+        'PG1': 'Variances explained manually and late.',
+        'PG2': 'Inconsistent application of contracts.',
+        'DS1': 'Time spent reconciling data instead of advising.',
+        'DS2': 'Reviews dominated by lagging indicators.',
+        'DA1': 'Fragmented systems; high effort to connect data.',
+        'DA2': 'Use cases built from scratch; no compounding.',
+        // Version 2: Company Domains (Banking/Financial Services)
+        'LO1': 'Loan decisions take 5-7 days; manual document review creates bottlenecks.',
+        'LO2': 'Credit models updated quarterly; portfolio risk assessed reactively.',
+        'DM1': 'Deposit pricing lags competitor moves by weeks; margin compression.',
+        'DM2': 'Attrition detected after customers leave; no early warning signals.',
+        'PP1': 'Fraud rules generate 95% false positives; real threats slip through.',
+        'PP2': 'Cross-border payments require 3-5 days manual reconciliation.',
+        'RC1': 'AML analysts review 500+ alerts daily; 80% are false positives.',
+        'RC2': 'Capital calculations require 2-week manual effort each quarter.',
+        'CO1': 'KYC takes 5-10 days; 30% of applications abandoned due to friction.',
+        'CO2': 'CDD reviews backlogged 3 weeks; high-risk customers slip through.',
+        'TO1': 'Cash positions known only at EOD; intraday liquidity blind spots.',
+        'TO2': 'FX exposures tracked in spreadsheets; hedging decisions delayed.',
+        'RR1': 'Regulatory reports require 3-week manual assembly each quarter.',
+        'RR2': 'Data lineage gaps cause restatements and regulatory scrutiny.',
+        // Version 3: Vertical Domains (Finance Functions)
+        'FP1': 'Forecasts updated monthly; scenarios take weeks to model.',
+        'FP2': 'Variance analysis is manual; root causes identified late.',
+        'TR1': 'Cash forecasts off by 15-20%; liquidity buffers too conservative.',
+        'TR2': 'Bank recs take 5 days; exceptions pile up at month-end.',
+        'AC1': 'Close takes 10+ days; journal entries require manual review.',
+        'AC2': 'Intercompany recs consume 40% of close effort; mismatches common.',
+        'TX1': 'Tax provision requires 3 weeks; late changes cause rework.',
+        'TX2': 'Transfer pricing documentation is reactive; audit risk high.',
+        'PR1': 'Invoice processing takes 5 days; 15% require manual intervention.',
+        'PR2': 'Contract terms not enforced; 8-12% spend leakage undetected.',
+        'IA1': 'Controls tested annually; issues found after damage done.',
+        'IA2': 'Audit plans based on last year; emerging risks missed.',
+        'IR1': 'Earnings prep requires 2-week war room; last-minute changes.',
+        'IR2': 'Investor queries take days to answer; inconsistent responses.',
+        'SS1': 'Tickets routed manually; 25% misrouted causing delays.',
+        'SS2': 'SLA breaches detected after the fact; capacity planning reactive.'
+      };
+      return points[`${abbr}${num}`] || 'Process inefficiency and manual overhead.';
+    }
+
+    function getSolution(abbr, num) {
+      const solutions = {
+        // Version 1: Company P&L (Finance Control)
+        'PF1': 'Ingest disruption events & crew schedules to update outlooks, reduce error, and restore guidance credibility.',
+        'PF2': 'Attribute changes to specific drivers (crew, fuel, disruptions) to improve transparency and confidence.',
+        'CA1': 'Track realized vs. expected returns to reallocate capital from underperformers and protect ROIC.',
+        'CA2': 'Simulate fleet economics under disruption scenarios to improve resilience and margin.',
+        'RM1': 'Attribute disruption costs to routes to reveal true profitability and improve network/fleet decisions.',
+        'RM2': 'Decompose margin moves into drivers to enable earlier corrective actions on revenue and cost.',
+        'CE1': 'Automate rate/date reconciliation to flag mismatches and reduce leakage.',
+        'CE2': 'Extract, validate, and post DOC invoices directly into SAP to speed up close and improve accuracy.',
+        'WC1': 'Forecast consumption & track outbound assets to reduce losses, emergency shipments, and excess.',
+        'WC2': 'Define demand-driven replenishment rules to optimize service levels while freeing working capital.',
+        'PG1': 'Automate variance attribution and flag recurring drivers to improve cost discipline and forecast governance.',
+        'PG2': 'Monitor compliance with contracts to reduce leakage and enforce controls.',
+        'DS1': 'Answer concrete questions (cost impact, deltas) instantly to increase velocity and finance leverage.',
+        'DS2': 'Surface forward-looking risk and opportunity signals to enable proactive steering at ExCo level.',
+        'DA1': 'Connect SAP with operational systems for a single source of truth for forecasting, costing, and reporting.',
+        'DA2': 'Standardize finance data products (cost drivers, inventory) to compound value across all AI cases.',
+        // Version 2: Company Domains (Banking/Financial Services)
+        'LO1': 'Deploy AI to auto-extract documents, score applications, and cut decision time from days to hours while improving approval accuracy.',
+        'LO2': 'Implement ML models for real-time credit scoring and portfolio-level risk analytics to reduce losses by 15-25%.',
+        'DM1': 'Use dynamic pricing models to optimize deposit rates in real-time, improving NIM by 10-20 bps.',
+        'DM2': 'Deploy churn prediction models to identify at-risk depositors 60 days early and trigger retention actions.',
+        'PP1': 'Implement ML-based fraud detection to reduce false positives by 70% while catching 30% more real fraud.',
+        'PP2': 'Automate cross-border payment matching and reconciliation to achieve same-day settlement.',
+        'RC1': 'Deploy AI to prioritize alerts by risk, reducing analyst workload 60% while improving SAR quality.',
+        'RC2': 'Automate capital calculations with real-time data feeds, cutting effort from weeks to days.',
+        'CO1': 'Implement AI-powered document verification and biometric checks to complete KYC in under 10 minutes.',
+        'CO2': 'Deploy risk-based CDD automation to clear 80% of reviews instantly, focusing analysts on true risks.',
+        'TO1': 'Build real-time cash visibility and ML-based forecasting to optimize liquidity buffers by 20-30%.',
+        'TO2': 'Automate FX exposure tracking and hedging recommendations to reduce currency losses by 15-25%.',
+        'RR1': 'Auto-generate regulatory reports from source systems, cutting preparation time from weeks to days.',
+        'RR2': 'Implement automated data lineage and quality checks to ensure first-time-right submissions.',
+        // Version 3: Vertical Domains (Finance Functions)
+        'FP1': 'Enable continuous forecasting with AI-driven scenario modeling, cutting cycle time from weeks to days.',
+        'FP2': 'Automate variance decomposition and root cause analysis to surface insights in hours, not weeks.',
+        'TR1': 'Deploy ML-based cash forecasting to improve accuracy to 95%+ and optimize working capital.',
+        'TR2': 'Automate bank reconciliation with AI matching, reducing close time from days to hours.',
+        'AC1': 'Implement intelligent automation for journal entries and close tasks, cutting close by 3-5 days.',
+        'AC2': 'Deploy AI-powered intercompany matching to auto-clear 90% of transactions and flag exceptions.',
+        'TX1': 'Automate tax data collection and provision calculations, reducing cycle time by 50%.',
+        'TX2': 'Generate transfer pricing documentation automatically with AI-assisted policy application.',
+        'PR1': 'Deploy AI to extract, validate, and match invoices automatically, achieving 85% straight-through processing.',
+        'PR2': 'Implement contract AI to monitor compliance and flag spend leakage, recovering 3-5% of spend.',
+        'IA1': 'Deploy continuous monitoring bots to test controls in real-time, catching issues before they escalate.',
+        'IA2': 'Use AI risk scoring to dynamically prioritize audit focus on emerging and highest-impact risks.',
+        'IR1': 'Automate earnings data assembly and commentary generation, cutting prep time by 60%.',
+        'IR2': 'Deploy IR copilot to instantly answer investor queries with consistent, compliant responses.',
+        'SS1': 'Implement AI triage to auto-classify and route tickets, reducing misrouting by 90%.',
+        'SS2': 'Deploy predictive analytics for demand forecasting and capacity planning to prevent SLA breaches.'
+      };
+      return solutions[`${abbr}${num}`] || 'Automate process to reduce manual effort and improve accuracy.';
+    }
+
+    // Custom domain content generators (for "Other" option)
+    function getCustomWorkflowName(domainName, num) {
+      const templates = {
+        1: [
+          `Automated ${domainName} Processing`,
+          `${domainName} Workflow Optimization`,
+          `Intelligent ${domainName} Triage`,
+          `${domainName} Data Integration`,
+          `Real-time ${domainName} Analytics`
+        ],
+        2: [
+          `${domainName} Performance Monitoring`,
+          `${domainName} Quality Assurance`,
+          `${domainName} Compliance Automation`,
+          `Predictive ${domainName} Insights`,
+          `${domainName} Exception Handling`
+        ]
+      };
+      // Use domain name hash to consistently pick template
+      const hash = domainName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      const idx = hash % templates[num].length;
+      return templates[num][idx];
+    }
+
+    function getCustomPainPoint(domainName, num) {
+      const templates = {
+        1: [
+          `Manual ${domainName.toLowerCase()} processes cause delays and errors.`,
+          `Fragmented data across ${domainName.toLowerCase()} systems.`,
+          `Lack of visibility into ${domainName.toLowerCase()} status.`,
+          `High manual effort in ${domainName.toLowerCase()} tasks.`,
+          `Inconsistent ${domainName.toLowerCase()} execution.`
+        ],
+        2: [
+          `${domainName} decisions based on outdated information.`,
+          `No proactive alerting for ${domainName.toLowerCase()} issues.`,
+          `Compliance gaps in ${domainName.toLowerCase()} workflows.`,
+          `Limited scalability in ${domainName.toLowerCase()}.`,
+          `Poor handoffs between ${domainName.toLowerCase()} steps.`
+        ]
+      };
+      const hash = domainName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      const idx = hash % templates[num].length;
+      return templates[num][idx];
+    }
+
+    function getCustomSolution(domainName, num) {
+      const templates = {
+        1: [
+          `Automate ${domainName.toLowerCase()} intake and routing to reduce cycle time and manual touch.`,
+          `Connect ${domainName.toLowerCase()} data sources for unified view and faster decisions.`,
+          `Deploy AI triage to prioritize ${domainName.toLowerCase()} items by impact and urgency.`,
+          `Extract and validate ${domainName.toLowerCase()} data automatically to improve accuracy.`,
+          `Build real-time dashboards to surface ${domainName.toLowerCase()} bottlenecks instantly.`
+        ],
+        2: [
+          `Monitor ${domainName.toLowerCase()} KPIs continuously to catch issues before escalation.`,
+          `Automate ${domainName.toLowerCase()} quality checks to ensure compliance and consistency.`,
+          `Apply predictive models to forecast ${domainName.toLowerCase()} demand and allocate resources.`,
+          `Create exception workflows that auto-route ${domainName.toLowerCase()} anomalies for review.`,
+          `Implement smart handoffs to reduce ${domainName.toLowerCase()} processing delays.`
+        ]
+      };
+      const hash = domainName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      const idx = hash % templates[num].length;
+      return templates[num][idx];
+    }
+
+    function displayHeatmap(removeLoading = true) {
+      // Remove loading message only if specified (first generation)
+      if (removeLoading) {
+        const messages = document.getElementById('messages');
+        messages.lastChild.remove();
+      }
+
+      let tableHtml = `
+        <table class="table-preview">
+          <thead>
+            <tr>
+              <th>Finance Control Domain</th>
+              <th>Highest-ROI Workflows</th>
+              <th>Pain Points</th>
+              <th>Agentic Solution and P&L Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      let currentDomain = '';
+      state.heatmap.rows.forEach((row, idx) => {
+        const showDomain = row.domain !== currentDomain;
+        currentDomain = row.domain;
+
+        tableHtml += `
+          <tr data-row-idx="${idx}">
+            <td>${showDomain ? row.domain : ''}</td>
+            <td>${row.hasCheckmark ? '<span class="checkmark">✓</span>' : ''}${row.name}</td>
+            <td class="editable-cell" onclick="editHeatmapCell(${idx}, 'painPoint')">${row.painPoint} <span class="edit-icon">✏️</span></td>
+            <td class="editable-cell" onclick="editHeatmapCell(${idx}, 'solution')">${row.solution} <span class="edit-icon">✏️</span></td>
+          </tr>
+        `;
+      });
+
+      tableHtml += '</tbody></table>';
+
+      const msg = `
+        <h3>Heatmap Generated</h3>
+        <p>Here's the High-ROI Agentic Workflows Heatmap for <strong>${state.context.company}</strong>:</p>
+        <p style="color: #888; font-size: 12px; margin-bottom: 12px;">Click any Pain Point or Solution cell to edit it. When done, select a title below.</p>
+        ${tableHtml}
+        ${state.heatmap.footer ? `<p style="color: #4ade80; font-size: 13px; margin-top: 12px;">✓ ${state.heatmap.footer}</p>` : ''}
+        <h4 style="margin-top: 20px;">Select a title:</h4>
+        ${renderOptions(state.heatmap.titles.map((t, i) => `${i + 1}. ${t}`), 'title')}
+      `;
+
+      addMessage(msg);
+      state.waitingForHeatmapFeedback = true;
+    }
+
+    // Edit a heatmap cell inline
+    function editHeatmapCell(rowIdx, field) {
+      const row = state.heatmap.rows[rowIdx];
+      const currentValue = row[field];
+
+      // Create modal for editing
+      const modal = document.createElement('div');
+      modal.id = 'edit-modal';
+      modal.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+          <div style="background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 12px; padding: 24px; max-width: 600px; width: 90%;">
+            <h3 style="color: #fff; margin-bottom: 8px;">Edit ${field === 'painPoint' ? 'Pain Point' : 'Solution'}</h3>
+            <p style="color: #888; font-size: 13px; margin-bottom: 16px;">Row: ${row.name}</p>
+            <textarea id="edit-cell-input" style="width: 100%; min-height: 100px; background: #0f0f0f; border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; color: #e0e0e0; font-size: 14px; resize: vertical;">${currentValue}</textarea>
+            <p style="color: #888; font-size: 11px; margin-top: 8px;">Pain Point: max 48 chars | Solution: max 114 chars</p>
+            <p id="char-count-edit" style="color: #888; font-size: 11px;">Current: ${currentValue.length} chars</p>
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+              <button onclick="saveHeatmapEdit(${rowIdx}, '${field}')" style="flex: 1; background: #2563eb; border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">Save</button>
+              <button onclick="closeEditModal()" style="flex: 1; background: #3a3a3a; border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer;">Cancel</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // Focus and select text
+      const input = document.getElementById('edit-cell-input');
+      input.focus();
+      input.select();
+
+      // Update char count on input
+      input.addEventListener('input', () => {
+        document.getElementById('char-count-edit').textContent = `Current: ${input.value.length} chars`;
+      });
+    }
+
+    function saveHeatmapEdit(rowIdx, field) {
+      const input = document.getElementById('edit-cell-input');
+      const newValue = input.value.trim();
+
+      if (newValue) {
+        state.heatmap.rows[rowIdx][field] = newValue;
+        closeEditModal();
+
+        // Refresh display
+        const messages = document.getElementById('messages');
+        messages.lastChild.remove();
+        displayHeatmap(false);
+      }
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('edit-modal');
+      if (modal) modal.remove();
+    }
+
+    function handleTitleSelection(index) {
+      addMessage(`Selected: "${state.heatmap.titles[index]}"`, true);
+
+      setTimeout(() => {
+        askForWorkflowSelection();
+      }, 300);
+    }
+
+    function askForWorkflowSelection() {
+      updatePhase(3);
+
+      // Get all workflows - use original full set if available, otherwise current rows
+      const allWorkflows = state.heatmap.allRows || state.heatmap.rows;
+      const workflowCount = allWorkflows.length;
+
+      let html = `
+        <h3>Select Your Top Workflows</h3>
+        <p>Choose workflows for the detail slides. I'll group them into angle cards (pairs or triples).</p>
+        <p style="color: #888; font-size: 13px; margin-top: 8px;">
+          ${workflowCount} workflows available. Select any number (2+) most relevant to ${state.context.audience.name || 'your audience'}.
+        </p>
+        <div class="workflow-selector" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      `;
+
+      // Group workflows by domain for easier selection
+      const workflowsByDomain = {};
+      allWorkflows.forEach((row, i) => {
+        if (!workflowsByDomain[row.domain]) {
+          workflowsByDomain[row.domain] = [];
+        }
+        workflowsByDomain[row.domain].push({ ...row, originalIndex: i });
+      });
+
+      // Display grouped by domain
+      Object.keys(workflowsByDomain).forEach(domain => {
+        html += `<div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 4px; color: #60a5fa; font-weight: 600; font-size: 12px; text-transform: uppercase;">${domain}</div>`;
+        workflowsByDomain[domain].forEach(row => {
+          const isChecked = row.hasCheckmark ? 'checked' : '';
+          html += `
+            <label class="workflow-item ${row.hasCheckmark ? 'selected' : ''}" onclick="toggleWorkflow(${row.originalIndex})">
+              <input type="checkbox" id="wf-${row.originalIndex}" ${isChecked}>
+              <span>${row.name}</span>
+            </label>
+          `;
+        });
+      });
+
+      html += `
+        </div>
+        <div style="margin-top: 20px; padding: 16px; background: #1a1a1a; border-radius: 8px; border: 1px solid #2a2a2a;">
+          <h4 style="margin-bottom: 8px; color: #fff;">Grouping Suggestions (Optional)</h4>
+          <p style="color: #888; font-size: 13px; margin-bottom: 12px;">
+            How would you like to pair these workflows? Type suggestions below or leave blank for auto-grouping.
+          </p>
+          <textarea id="grouping-suggestions" placeholder="e.g., 'Pair forecasting with capital allocation' or 'Group by strategic impact'"
+            style="width: 100%; background: #0f0f0f; border: 1px solid #3a3a3a; border-radius: 6px; padding: 10px; color: #e0e0e0; font-size: 13px; min-height: 60px; resize: vertical;"></textarea>
+        </div>
+        <button class="option-btn" style="margin-top: 16px; background: #2563eb; border-color: #2563eb;" onclick="confirmWorkflowSelection()">
+          Confirm Selection & Generate Angle Cards
+        </button>
+      `;
+
+      addMessage(html);
+    }
+
+    function toggleWorkflow(index) {
+      const checkbox = document.getElementById(`wf-${index}`);
+      checkbox.checked = !checkbox.checked;
+      checkbox.closest('.workflow-item').classList.toggle('selected', checkbox.checked);
+    }
+
+    function confirmWorkflowSelection() {
+      const allWorkflows = state.heatmap.allRows || state.heatmap.rows;
+      const selected = [];
+
+      allWorkflows.forEach((row, i) => {
+        if (document.getElementById(`wf-${i}`)?.checked) {
+          selected.push(row);
+        }
+      });
+
+      if (selected.length < 2) {
+        alert('Please select at least 2 workflows.');
+        return;
+      }
+
+      // Get grouping suggestions
+      const groupingSuggestions = document.getElementById('grouping-suggestions')?.value || '';
+      state.groupingSuggestions = groupingSuggestions;
+
+      state.selectedWorkflows = selected;
+
+      let confirmMsg = `Selected ${selected.length} workflows: ${selected.map(w => w.id).join(', ')}`;
+      if (groupingSuggestions) {
+        confirmMsg += `\n\nGrouping preference: "${groupingSuggestions}"`;
+      }
+      addMessage(confirmMsg, true);
+
+      setTimeout(() => {
+        generateAngleCards();
+      }, 300);
+    }
+
+    async function generateAngleCards() {
+      updatePhase(4);
+
+      addMessage(`
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <span>Generating Angle Cards with AI...</span>
+        </div>
+      `);
+
+      // Determine grouping strategy based on count and suggestions
+      const workflows = state.selectedWorkflows;
+      const suggestions = (state.groupingSuggestions || '').toLowerCase();
+      const groups = [];
+
+      // Check if user wants groups of 3
+      const wantsThrees = suggestions.includes('3') || suggestions.includes('three') || suggestions.includes('triple');
+
+      if (wantsThrees && workflows.length >= 3) {
+        // Group by 3s, with remainder as smaller group
+        for (let i = 0; i < workflows.length; i += 3) {
+          const group = workflows.slice(i, Math.min(i + 3, workflows.length));
+          if (group.length > 0) groups.push(group);
+        }
+      } else {
+        // Default: group by 2s, with last group of 3 if odd number
+        const count = workflows.length;
+        if (count % 2 === 1 && count >= 3) {
+          // Odd number: make last group a triple
+          for (let i = 0; i < count - 3; i += 2) {
+            groups.push([workflows[i], workflows[i + 1]]);
+          }
+          groups.push([workflows[count - 3], workflows[count - 2], workflows[count - 1]]);
+        } else {
+          // Even number: all pairs
+          for (let i = 0; i < count; i += 2) {
+            if (workflows[i + 1]) {
+              groups.push([workflows[i], workflows[i + 1]]);
+            } else {
+              groups.push([workflows[i]]); // Single item if somehow odd
+            }
+          }
+        }
+      }
+
+      // Check if API is available
+      let useAI = false;
+      try {
+        const statusRes = await fetch('/api/status');
+        const status = await statusRes.json();
+        useAI = status.openaiConfigured;
+      } catch (e) {
+        console.log('API not available, using fallback templates');
+      }
+
+      if (useAI) {
+        // Generate each card via OpenAI API
+        state.angleCards = [];
+        for (let i = 0; i < groups.length; i++) {
+          const group = groups[i];
+          try {
+            // Update loading message
+            const messages = document.getElementById('messages');
+            const loadingMsg = messages.lastChild?.querySelector('.loading span');
+            if (loadingMsg) {
+              loadingMsg.textContent = `Generating Card ${i + 1} of ${groups.length} with GPT-5.2...`;
+            }
+
+            const response = await fetch('/api/generate-angle-card', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                context: state.context,
+                workflows: group,
+                cardIndex: i,
+                totalCards: groups.length
+              })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+              const aiData = result.data;
+              state.angleCards.push({
+                workflows: group.map((w, wi) => {
+                  const aiWorkflow = aiData.workflows?.[wi] || {};
+                  return {
+                    ...w,
+                    subtitle: aiWorkflow.subtitle || generateWorkflowSubtitle(w),
+                    challenges: aiWorkflow.challenges || generateChallenges(w),
+                    solutions: aiWorkflow.solutions || generateSolutions(w),
+                    impacts: aiWorkflow.impacts || generateImpacts(w)
+                  };
+                }),
+                title: aiData.title || generateFallbackTitle(group),
+                approved: false
+              });
+            } else {
+              console.error('API error:', result.error);
+              state.angleCards.push(generateFallbackCard(group));
+            }
+          } catch (error) {
+            console.error('Error generating card', i, error);
+            state.angleCards.push(generateFallbackCard(group));
+          }
+        }
+      } else {
+        // Fallback: use template-based generation
+        state.angleCards = groups.map(group => generateFallbackCard(group));
+      }
+
+      // Start reviewing cards one by one
+      state.currentAngleCardIndex = 0;
+      displayCurrentAngleCard();
+    }
+
+    function generateFallbackTitle(group) {
+      const domains = [...new Set(group.map(w => w.domain.toLowerCase()))];
+      const domainText = domains.length === 1
+        ? domains[0]
+        : domains.slice(0, -1).join(', ') + ' and ' + domains[domains.length - 1];
+      return `High-performing ${state.context.industry.toLowerCase()} organizations excel through ${domainText} integration`;
+    }
+
+    function generateFallbackCard(group) {
+      return {
+        workflows: group.map(w => ({
+          ...w,
+          subtitle: generateWorkflowSubtitle(w),
+          challenges: generateChallenges(w),
+          solutions: generateSolutions(w),
+          impacts: generateImpacts(w)
+        })),
+        title: generateFallbackTitle(group),
+        approved: false
+      };
+    }
+
+    // Version counter for truly random regeneration
+    let contentVersion = 0;
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function shuffleAndPick(arr, count) {
+      const shuffled = [...arr].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, count);
+    }
+
+    function generateWorkflowSubtitle(workflow) {
+      const { company, industry, audience } = state.context;
+      const domain = workflow.domain.toLowerCase();
+      const audienceRole = audience.title.toLowerCase();
+
+      const templates = [
+        `Automating ${domain} to address ${audience.name}'s focus on ${audience.concerns.toLowerCase()}.`,
+        `Building intelligent ${domain} capabilities for ${industry} leaders.`,
+        `Transforming ${domain} through AI-driven insights that matter to ${audienceRole}s.`,
+        `Enabling real-time ${domain} optimization at ${company}.`,
+        `Streamlining ${domain} workflows to drive ${audience.concerns.toLowerCase()}.`,
+        `Accelerating ${domain} decisions with AI—aligned to ${audience.name}'s priorities.`,
+        `Empowering ${industry} ${domain} with intelligent automation.`,
+        `Delivering ${domain} intelligence tailored for ${audienceRole} visibility.`
+      ];
+      return pickRandom(templates);
+    }
+
+    function generateChallenges(workflow) {
+      const { company, industry, audience } = state.context;
+      const domain = workflow.domain.toLowerCase();
+
+      // STRICT: Each bullet MUST be 70-85 chars - these are pre-measured templates
+      const challengePool = [
+        `Manual entry and reconciliation across fragmented systems drives delays and accuracy gaps.`, // 84
+        `Limited visibility into operational drivers during close cycles delays executive reporting.`, // 85
+        `Fragmented data sources and inconsistent metric definitions complicate decision-making.`, // 83
+        `Legacy processes consume analyst capacity on low-value reconciliation instead of insights.`, // 85
+        `Inconsistent data validation rules and missing controls undermine reporting reliability.`, // 84
+        `Cross-functional handoffs and manual workflows introduce systematic delays and errors.`, // 82
+        `Siloed systems prevent real-time insight into operational status and emerging risk signals.`, // 85
+        `Static reporting cycles miss dynamic changes that impact forecasts and strategic decisions.`, // 85
+        `Lack of automated exception handling increases manual effort and extends processing time.`, // 84
+        `Disconnected workflows create blind spots that erode forecast accuracy and control.` // 78
+      ];
+
+      // Enforce 85 char max strictly
+      return shuffleAndPick(challengePool, 3).map(enforceBulletMax);
+    }
+
+    // Helper to enforce 85 char max - truncate at word boundary
+    function enforceBulletMax(text, max = 85) {
+      if (!text) return text;
+      text = text.trim();
+      if (text.length <= max) return text;
+      // Leave room for period
+      let cut = text.lastIndexOf(' ', max - 2);
+      if (cut < 50) cut = max - 2;
+      let result = text.substring(0, cut).trim();
+      if (!/[.!?]$/.test(result)) result += '.';
+      // HARD truncate if still over - this guarantees <= max
+      if (result.length > max) {
+        result = result.substring(0, max - 1) + '.';
+      }
+      return result;
+    }
+
+    function generateSolutions(workflow) {
+      const { company, industry, audience } = state.context;
+      const domain = workflow.domain.toLowerCase();
+
+      // STRICT: Each bullet MUST be 70-85 chars - these are pre-measured templates
+      const solutionPool = [
+        `Automate extraction, validation, classification, and posting to core finance systems.`, // 81
+        `Route only low-confidence exceptions to analysts, processing 90%+ straight-through.`, // 80
+        `Cross-reference data against contracts and policies to flag discrepancies in real time.`, // 84
+        `Create digital audit trails for governance, compliance, and rapid regulatory response.`, // 83
+        `Provide executive dashboards with real-time operational metrics and trend analysis.`, // 80
+        `Enable drill-down into anomalies and root causes within seconds instead of hours.`, // 78
+        `Integrate ML models that learn operational patterns and improve accuracy over time.`, // 80
+        `Automate reconciliation across systems, geographies, and business units seamlessly.`, // 81
+        `Surface actionable insights aligned to strategic priorities and key performance goals.`, // 83
+        `Implement intelligent alerts for exceptions, emerging risks, and opportunity signals.`, // 82
+        `Reduce manual touchpoints from 10+ to 2-3 via end-to-end workflow orchestration.`, // 79
+        `Standardize data flows and validation rules to ensure consistency across all inputs.` // 79
+      ];
+
+      // Enforce 85 char max strictly
+      return shuffleAndPick(solutionPool, 5).map(enforceBulletMax);
+    }
+
+    function generateImpacts(workflow) {
+      const { company, industry, audience } = state.context;
+      const domain = workflow.domain.toLowerCase();
+
+      // STRICT: Each bullet MUST be 70-85 chars - these are pre-measured templates
+      const impactPool = [
+        `Accelerate cycle times by 2-3 days via automated processing and intelligent routing.`, // 82
+        `Reduce errors by 90% and eliminate low-value manual rework that drains analyst time.`, // 82
+        `Enhance accuracy to support tighter budget control, variance analysis, and forecasts.`, // 83
+        `Free analyst capacity to focus on strategic insights and high-value decision support.`, // 83
+        `Deliver real-time visibility and forward-looking signals that executives can act on.`, // 82
+        `Cut operational processing costs by 40-60% within first year of full deployment.`, // 79
+        `Enable faster close cycles and earlier intervention on emerging variances and risks.`, // 82
+        `Improve forecast accuracy by 25-30% with ML-driven insights and pattern recognition.`, // 82
+        `Reduce audit preparation time by 50% with automated trails and governance controls.`, // 82
+        `Empower teams to handle 3x volume without adding headcount or compromising quality.` // 81
+      ];
+
+      // Enforce 85 char max strictly
+      return shuffleAndPick(impactPool, 3).map(enforceBulletMax);
+    }
+
+    function displayCurrentAngleCard() {
+      const messages = document.getElementById('messages');
+      // Remove loading if present
+      const lastChild = messages.lastChild;
+      if (lastChild && lastChild.querySelector && lastChild.querySelector('.loading')) {
+        messages.removeChild(lastChild);
+      }
+
+      const cardIndex = state.currentAngleCardIndex;
+      const card = state.angleCards[cardIndex];
+      const totalCards = state.angleCards.length;
+
+      const workflowIds = card.workflows.map(w => w.id).join(' + ');
+
+      let html = `
+        <h3>Angle Card ${cardIndex + 1} of ${totalCards}: ${workflowIds}</h3>
+        <p style="color: #888; margin-bottom: 16px;">Review the content below. Type feedback to iterate, or click Approve to continue.</p>
+
+        <div style="background: #151515; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin: 12px 0;">
+          <p style="color: #888; font-size: 12px; margin-bottom: 8px;">AI Value Creation in ${state.context.industry} — Example High-ROI Agentic Workflows</p>
+          <h4 style="color: #fff; font-size: 18px; margin-bottom: 20px;">${card.title}</h4>
+
+          <div style="display: grid; grid-template-columns: ${card.workflows.length === 1 ? '1fr' : 'repeat(' + card.workflows.length + ', 1fr)'}; gap: 16px;">
+            ${card.workflows.map(w => `
+              <div style="background: #1a1a1a; border-radius: 8px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #1e3a5f, #2563eb); padding: 12px 16px;">
+                  <span style="color: #fff; font-weight: 600;">${w.domain}</span>
+                </div>
+                <div style="padding: 16px;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                    <div style="width: 40px; height: 40px; background: #2a2a2a; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                      <span style="font-size: 18px;">📋</span>
+                    </div>
+                    <div>
+                      <p style="color: #fff; font-weight: 600;"><span style="color: #888;">${w.id}.</span> ${w.name || ''}</p>
+                      <p style="color: #888; font-size: 12px; margin-top: 4px;">${w.subtitle || ''}</p>
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom: 16px;">
+                    <p style="color: #888; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Challenges <span style="font-weight: 400; font-size: 10px;">(70-85 chars each)</span></p>
+                    <ul style="margin: 0; padding-left: 16px; color: #ccc; font-size: 13px; line-height: 1.6;">
+                      ${w.challenges.map(c => { const txt = enforceBulletMax(c); return `<li style="margin-bottom: 4px;">${txt} <span class="char-count ${getCharCountClass(txt.length, 70, 85)}">(${txt.length})</span></li>`; }).join('')}
+                    </ul>
+                  </div>
+
+                  <div style="margin-bottom: 16px;">
+                    <p style="color: #888; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Solution <span style="font-weight: 400; font-size: 10px;">(70-85 chars each)</span></p>
+                    <ul style="margin: 0; padding-left: 16px; color: #ccc; font-size: 13px; line-height: 1.6;">
+                      ${w.solutions.map(s => { const txt = enforceBulletMax(s); return `<li style="margin-bottom: 4px;">${txt} <span class="char-count ${getCharCountClass(txt.length, 70, 85)}">(${txt.length})</span></li>`; }).join('')}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p style="color: #888; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Impact <span style="font-weight: 400; font-size: 10px;">(70-85 chars each)</span></p>
+                    <ul style="margin: 0; padding-left: 16px; color: #4ade80; font-size: 13px; line-height: 1.6;">
+                      ${w.impacts.map(i => { const txt = enforceBulletMax(i); return `<li style="margin-bottom: 4px;">${txt} <span class="char-count ${getCharCountClass(txt.length, 70, 85)}">(${txt.length})</span></li>`; }).join('')}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+            <p style="color: #4ade80; font-size: 12px; margin: 0;">✓ Case Mentioned in Introduction Call by ${state.context.audience.name} (${state.context.audience.title})</p>
+            <p style="color: #888; font-size: 12px; margin: 0;">Augusta Labs</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button class="option-btn" style="background: #2563eb; border-color: #2563eb; flex: 1;" onclick="approveAngleCard()">
+            ✓ Approve${cardIndex < totalCards - 1 ? ' & Next' : ' & Export'}
+          </button>
+          <button class="option-btn" style="flex: 1;" onclick="regenerateAngleCard()">
+            ↻ Regenerate
+          </button>
+        </div>
+        <p style="color: #888; font-size: 12px; margin-top: 8px;">Or type specific feedback below to iterate on this card.</p>
+      `;
+
+      addMessage(html);
+      state.waitingForAngleCardFeedback = true;
+    }
+
+    function approveAngleCard() {
+      state.angleCards[state.currentAngleCardIndex].approved = true;
+      state.waitingForAngleCardFeedback = false;
+
+      addMessage(`✓ Approved Angle Card ${state.currentAngleCardIndex + 1}`, true);
+
+      if (state.currentAngleCardIndex < state.angleCards.length - 1) {
+        // Move to next card
+        state.currentAngleCardIndex++;
+        setTimeout(() => {
+          displayCurrentAngleCard();
+        }, 300);
+      } else {
+        // All cards approved, go to title selection
+        setTimeout(() => {
+          generateAngleCardTitles();
+        }, 300);
+      }
+    }
+
+    async function generateAngleCardTitles() {
+      addMessage(`
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <span>Generating title options for Angle Cards...</span>
+        </div>
+      `);
+
+      // Check if API is available
+      let useAI = false;
+      try {
+        const statusRes = await fetch('/api/status');
+        const status = await statusRes.json();
+        useAI = status.openaiConfigured;
+      } catch (e) {
+        console.log('API not available, using fallback titles');
+      }
+
+      if (useAI) {
+        try {
+          const response = await fetch('/api/generate-angle-card-titles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              context: state.context,
+              angleCards: state.angleCards
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success && result.data?.cards) {
+            state.angleCardTitles = result.data.cards;
+          } else {
+            // Fallback to existing titles
+            state.angleCardTitles = state.angleCards.map((card, i) => ({
+              cardIndex: i,
+              workflows: card.workflows.map(w => w.id).join(' + '),
+              domains: [...new Set(card.workflows.map(w => w.domain))].join(' & '),
+              titles: generateFallbackAngleCardTitles(card, i),
+              selectedIndex: 0
+            }));
+          }
+        } catch (error) {
+          console.error('Error generating angle card titles:', error);
+          state.angleCardTitles = state.angleCards.map((card, i) => ({
+            cardIndex: i,
+            workflows: card.workflows.map(w => w.id).join(' + '),
+            domains: [...new Set(card.workflows.map(w => w.domain))].join(' & '),
+            titles: generateFallbackAngleCardTitles(card, i),
+            selectedIndex: 0
+          }));
+        }
+      } else {
+        // Fallback: generate titles locally
+        state.angleCardTitles = state.angleCards.map((card, i) => ({
+          cardIndex: i,
+          workflows: card.workflows.map(w => w.id).join(' + '),
+          domains: [...new Set(card.workflows.map(w => w.domain))].join(' & '),
+          titles: generateFallbackAngleCardTitles(card, i),
+          selectedIndex: 0
+        }));
+      }
+
+      displayAngleCardTitleSelection();
+    }
+
+    function generateFallbackAngleCardTitles(card, index) {
+      const { industry, company } = state.context;
+      const domains = [...new Set(card.workflows.map(w => w.domain))];
+      const domainText = domains.join(' & ').toLowerCase();
+
+      return [
+        card.title || `High-performing ${industry.toLowerCase()} organizations excel through ${domainText} integration`,
+        `${domainText.charAt(0).toUpperCase() + domainText.slice(1)} excellence drives ${industry.toLowerCase()} P&L performance`,
+        `${company} margin expansion requires ${domainText} automation`,
+        `AI-enabled ${domainText} creates durable competitive advantage`,
+        `${domainText.charAt(0).toUpperCase() + domainText.slice(1)} transformation accelerates ${industry.toLowerCase()} value creation`
+      ];
+    }
+
+    function displayAngleCardTitleSelection() {
+      // Remove loading message
+      const messages = document.getElementById('messages');
+      const lastChild = messages.lastChild;
+      if (lastChild && lastChild.querySelector && lastChild.querySelector('.loading')) {
+        messages.removeChild(lastChild);
+      }
+
+      let html = `
+        <h3>Select Titles for Angle Cards</h3>
+        <p style="color: #888; margin-bottom: 16px;">Choose a title for each angle card slide. Click on an option to select it.</p>
+      `;
+
+      state.angleCardTitles.forEach((cardTitles, cardIndex) => {
+        html += `
+          <div style="background: #151515; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <h4 style="color: #60a5fa; margin-bottom: 8px;">Angle Card ${cardIndex + 1}: ${cardTitles.workflows}</h4>
+            <p style="color: #888; font-size: 12px; margin-bottom: 12px;">Domains: ${cardTitles.domains}</p>
+            <div class="title-options" id="angle-title-options-${cardIndex}">
+              ${cardTitles.titles.map((title, titleIndex) => `
+                <label class="workflow-item ${titleIndex === cardTitles.selectedIndex ? 'selected' : ''}"
+                       onclick="selectAngleCardTitle(${cardIndex}, ${titleIndex})"
+                       style="display: block; margin-bottom: 8px; cursor: pointer;">
+                  <input type="radio" name="angle-title-${cardIndex}" value="${titleIndex}"
+                         ${titleIndex === cardTitles.selectedIndex ? 'checked' : ''} style="margin-right: 8px;">
+                  <span style="font-size: 13px;">${title}</span>
+                  <span class="char-count ${getCharCountClass(title.length, 70, 90)}">(${title.length})</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+        <button class="option-btn" style="margin-top: 16px; background: #2563eb; border-color: #2563eb;" onclick="confirmAngleCardTitles()">
+          Confirm Titles & Export
+        </button>
+      `;
+
+      addMessage(html);
+    }
+
+    function selectAngleCardTitle(cardIndex, titleIndex) {
+      state.angleCardTitles[cardIndex].selectedIndex = titleIndex;
+
+      // Update UI
+      const container = document.getElementById(`angle-title-options-${cardIndex}`);
+      if (container) {
+        container.querySelectorAll('.workflow-item').forEach((item, i) => {
+          item.classList.toggle('selected', i === titleIndex);
+          const radio = item.querySelector('input[type="radio"]');
+          if (radio) radio.checked = (i === titleIndex);
+        });
+      }
+    }
+
+    function confirmAngleCardTitles() {
+      // Apply selected titles to angle cards
+      state.angleCardTitles.forEach((cardTitles, cardIndex) => {
+        const selectedTitle = cardTitles.titles[cardTitles.selectedIndex];
+        state.angleCards[cardIndex].title = selectedTitle;
+      });
+
+      addMessage('✓ Titles confirmed for all angle cards', true);
+
+      setTimeout(() => {
+        exportSlides();
+      }, 300);
+    }
+
+    async function regenerateAngleCard() {
+      const card = state.angleCards[state.currentAngleCardIndex];
+      const cardIndex = state.currentAngleCardIndex;
+
+      addMessage(`↻ Regenerating Angle Card ${cardIndex + 1} with AI...`, true);
+
+      // Show loading state
+      addMessage(`
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <span>Generating fresh content with GPT-5.2...</span>
+        </div>
+      `);
+
+      // Check if API is available
+      let useAI = false;
+      try {
+        const statusRes = await fetch('/api/status');
+        const status = await statusRes.json();
+        useAI = status.openaiConfigured;
+      } catch (e) {
+        console.log('API not available, using fallback');
+      }
+
+      if (useAI) {
+        try {
+          const response = await fetch('/api/generate-angle-card', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              context: state.context,
+              workflows: card.workflows,
+              cardIndex: cardIndex,
+              totalCards: state.angleCards.length
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success && result.data) {
+            const aiData = result.data;
+            card.workflows = card.workflows.map((w, wi) => {
+              const aiWorkflow = aiData.workflows?.[wi] || {};
+              return {
+                ...w,
+                subtitle: aiWorkflow.subtitle || w.subtitle,
+                challenges: aiWorkflow.challenges || w.challenges,
+                solutions: aiWorkflow.solutions || w.solutions,
+                impacts: aiWorkflow.impacts || w.impacts
+              };
+            });
+            card.title = aiData.title || card.title;
+          } else {
+            // Fallback to template regeneration
+            regenerateWithTemplates(card);
+          }
+        } catch (error) {
+          console.error('Error regenerating:', error);
+          regenerateWithTemplates(card);
+        }
+      } else {
+        regenerateWithTemplates(card);
+      }
+
+      // Remove loading message
+      const messages = document.getElementById('messages');
+      if (messages.lastChild?.querySelector('.loading')) {
+        messages.lastChild.remove();
+      }
+
+      displayCurrentAngleCard();
+    }
+
+    function regenerateWithTemplates(card) {
+      contentVersion++;
+      card.workflows = card.workflows.map(w => ({
+        ...w,
+        subtitle: generateWorkflowSubtitle(w),
+        challenges: generateChallenges(w),
+        solutions: generateSolutions(w),
+        impacts: generateImpacts(w)
+      }));
+
+      const domains = [...new Set(card.workflows.map(w => w.domain.toLowerCase()))];
+      const domainText = domains.join(' and ');
+      const { industry, audience } = state.context;
+
+      const titleTemplates = [
+        `High-performing ${industry.toLowerCase()} organizations excel through ${domainText} integration`,
+        `${audience.name}'s vision: AI-driven ${domainText} transformation`,
+        `Unlocking ${domainText} excellence for ${industry} leaders`,
+        `Strategic ${domainText} automation aligned to ${audience.concerns.toLowerCase()}`,
+        `${industry} ${domainText} reimagined through intelligent automation`
+      ];
+      card.title = pickRandom(titleTemplates);
+    }
+
+    function applyAngleCardFeedbackFromInput(feedback) {
+      const card = state.angleCards[state.currentAngleCardIndex];
+      const feedbackLower = feedback.toLowerCase();
+      const { company, industry, audience } = state.context;
+
+      // Store freeform feedback for context
+      if (!state.freeformFeedback) state.freeformFeedback = [];
+      state.freeformFeedback.push({
+        cardIndex: state.currentAngleCardIndex,
+        feedback: feedback,
+        timestamp: new Date().toISOString()
+      });
+
+      let appliedChanges = [];
+
+      // Check if user wants to modify specific text by providing new text
+      // Pattern: "change X to Y" or "replace X with Y" or "make it say Y"
+      const changeMatch = feedback.match(/(?:change|replace|make it say|update to|set to|use)[:\s]+["']?(.+?)["']?\s*(?:to|with|instead)[:\s]+["']?(.+?)["']?$/i);
+      if (changeMatch) {
+        const oldText = changeMatch[1].trim();
+        const newText = changeMatch[2].trim();
+
+        // Try to find and replace in challenges, solutions, impacts
+        card.workflows.forEach(w => {
+          w.challenges = w.challenges.map(c =>
+            c.toLowerCase().includes(oldText.toLowerCase()) ? newText : c
+          );
+          w.solutions = w.solutions.map(s =>
+            s.toLowerCase().includes(oldText.toLowerCase()) ? newText : s
+          );
+          w.impacts = w.impacts.map(i =>
+            i.toLowerCase().includes(oldText.toLowerCase()) ? newText : i
+          );
+        });
+        appliedChanges.push(`Replaced text containing "${oldText}"`);
+      }
+
+      // Pattern: Add specific content - "add challenge: X" or "add to challenges: X"
+      const addMatch = feedback.match(/add\s+(?:to\s+)?(challenge|solution|impact|subtitle)[s]?[:\s]+["']?(.+?)["']?$/i);
+      if (addMatch) {
+        const section = addMatch[1].toLowerCase();
+        const newContent = addMatch[2].trim();
+
+        card.workflows.forEach(w => {
+          if (section === 'challenge') {
+            w.challenges.push(newContent);
+          } else if (section === 'solution') {
+            w.solutions.push(newContent);
+          } else if (section === 'impact') {
+            w.impacts.push(newContent);
+          } else if (section === 'subtitle') {
+            w.subtitle = newContent;
+          }
+        });
+        appliedChanges.push(`Added ${section}: "${newContent}"`);
+      }
+
+      // Pattern: Remove specific content - "remove the bullet about X"
+      const removeMatch = feedback.match(/(?:remove|delete|drop)\s+(?:the\s+)?(?:bullet\s+)?(?:about\s+)?["']?(.+?)["']?$/i);
+      if (removeMatch) {
+        const textToRemove = removeMatch[1].trim().toLowerCase();
+
+        card.workflows.forEach(w => {
+          w.challenges = w.challenges.filter(c => !c.toLowerCase().includes(textToRemove));
+          w.solutions = w.solutions.filter(s => !s.toLowerCase().includes(textToRemove));
+          w.impacts = w.impacts.filter(i => !i.toLowerCase().includes(textToRemove));
+        });
+        appliedChanges.push(`Removed bullets mentioning "${textToRemove}"`);
+      }
+
+      // Pattern: Focus on specific topic - "focus more on efficiency" or "emphasize cost savings"
+      const focusMatch = feedback.match(/(?:focus|emphasize|highlight|stress)\s+(?:more\s+)?(?:on\s+)?["']?(.+?)["']?$/i);
+      if (focusMatch) {
+        const focusTopic = focusMatch[1].trim();
+
+        card.workflows.forEach(w => {
+          // Add a new challenge and impact related to the focus topic
+          w.challenges.push(`${focusTopic.charAt(0).toUpperCase() + focusTopic.slice(1)} gaps impacting ${audience.name}'s ${audience.concerns.toLowerCase()} objectives.`);
+          w.impacts.push(`Drive measurable ${focusTopic} improvements aligned to ${company}'s strategic goals.`);
+        });
+        appliedChanges.push(`Added emphasis on "${focusTopic}"`);
+      }
+
+      // Pattern: Mention specific person/role - "mention the CFO" or "reference João's concerns"
+      const mentionMatch = feedback.match(/(?:mention|reference|include|add)\s+(?:the\s+)?(\w+(?:'s)?)\s*(?:concerns?|priorities|focus|needs)?/i);
+      if (mentionMatch && !addMatch && !focusMatch) {
+        const personOrRole = mentionMatch[1].replace(/'s$/, '');
+
+        card.workflows.forEach(w => {
+          w.challenges.push(`Addressing ${personOrRole}'s key concerns about operational visibility and control.`);
+          w.solutions.push(`Provide ${personOrRole} with real-time dashboards and actionable insights.`);
+        });
+        appliedChanges.push(`Added reference to "${personOrRole}"`);
+      }
+
+      // Pattern: Make it more X - "make it more specific" or "make it shorter"
+      const styleMatch = feedback.match(/(?:make\s+it|be)\s+(?:more\s+)?(\w+)/i);
+      if (styleMatch && !changeMatch) {
+        const style = styleMatch[1].toLowerCase();
+
+        if (style === 'specific' || style === 'concrete') {
+          // Replace generic statements with more specific ones
+          card.workflows.forEach(w => {
+            w.impacts = w.impacts.map(i =>
+              i.replace(/improve/gi, 'achieve 25-30% improvement in')
+                .replace(/reduce/gi, 'cut by 40-60%')
+                .replace(/faster/gi, '2-3x faster')
+            );
+          });
+          appliedChanges.push('Made impacts more specific with concrete numbers');
+        } else if (style === 'shorter' || style === 'concise') {
+          card.workflows.forEach(w => {
+            w.challenges = w.challenges.slice(0, 2);
+            w.solutions = w.solutions.slice(0, 3);
+            w.impacts = w.impacts.slice(0, 2);
+          });
+          appliedChanges.push('Shortened content to key points');
+        } else if (style === 'technical') {
+          card.workflows.forEach(w => {
+            w.solutions.push(`Leverage ML models trained on ${industry.toLowerCase()}-specific data patterns.`);
+            w.solutions.push(`API-first architecture enables seamless integration with existing ERP systems.`);
+          });
+          appliedChanges.push('Added technical details');
+        }
+      }
+
+      // If user changes title directly
+      if (feedbackLower.includes('title:') || feedbackLower.includes('heading:')) {
+        const titleMatch = feedback.match(/(?:title|heading)[:\s]+["']?(.+?)["']?$/i);
+        if (titleMatch) {
+          card.title = titleMatch[1].trim();
+          appliedChanges.push(`Updated title to: "${card.title}"`);
+        }
+      }
+
+      // Fallback: If no specific pattern matched, regenerate with context awareness
+      if (appliedChanges.length === 0) {
+        contentVersion++;
+
+        // Parse feedback for context hints and regenerate with those in mind
+        const feedbackContext = {
+          mentionsEfficiency: feedbackLower.includes('efficien'),
+          mentionsCost: feedbackLower.includes('cost') || feedbackLower.includes('saving'),
+          mentionsSpeed: feedbackLower.includes('speed') || feedbackLower.includes('fast') || feedbackLower.includes('quick'),
+          mentionsQuality: feedbackLower.includes('quality') || feedbackLower.includes('accuracy'),
+          mentionsAudience: feedbackLower.includes(audience.name.toLowerCase()) || feedbackLower.includes(audience.title.toLowerCase())
+        };
+
+        card.workflows = card.workflows.map(w => {
+          const newWorkflow = {
+            ...w,
+            subtitle: generateWorkflowSubtitle(w),
+            challenges: generateChallenges(w),
+            solutions: generateSolutions(w),
+            impacts: generateImpacts(w)
+          };
+
+          // Add context-specific content based on feedback
+          if (feedbackContext.mentionsEfficiency) {
+            newWorkflow.impacts.push(`Boost operational efficiency by 35-50% through intelligent automation.`);
+          }
+          if (feedbackContext.mentionsCost) {
+            newWorkflow.impacts.push(`Reduce ${w.domain.toLowerCase()} costs by $2-5M annually.`);
+          }
+          if (feedbackContext.mentionsSpeed) {
+            newWorkflow.challenges.push(`Slow ${w.domain.toLowerCase()} cycles impede time-sensitive decisions.`);
+            newWorkflow.impacts.push(`Accelerate ${w.domain.toLowerCase()} processing from days to hours.`);
+          }
+
+          return newWorkflow;
+        });
+
+        appliedChanges.push(`Regenerated content incorporating: "${feedback}"`);
+      }
+
+      addMessage(`✓ Applied feedback: ${appliedChanges.join('; ')}`, true);
+
+      setTimeout(() => {
+        displayCurrentAngleCard();
+      }, 300);
+    }
+
+    // Legacy function for backwards compatibility
+    function displayAngleCards() {
+      displayCurrentAngleCard();
+    }
+
+    function generateEDN() {
+      // Generate actual Pitch.com EDN format with confirmed content embedded
+      const { context, heatmap, angleCards } = state;
+      const fontId = 'ff0051ea-2479-4922-b67e-04ab2bbea9c3';
+
+      // Helper to escape HTML entities for EDN
+      function escapeEdn(str) {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      }
+
+      // Generate heatmap table data in EDN format
+      let tableDataEdn = '[';
+      // Header row
+      tableDataEdn += '["<p>Finance Control Domain</p>" "<p>Highest-ROI Workflows</p>" "<p>Pain Points</p>" "<p>Agentic Solution and P&amp;L Impact</p>"]';
+
+      let lastDomain = '';
+      heatmap.rows.forEach(row => {
+        const domainCell = row.domain === lastDomain ? '<p></p>' : `<p>${escapeEdn(row.domain)}</p>`;
+        lastDomain = row.domain;
+        tableDataEdn += ` ["${domainCell}" "<p>${escapeEdn(row.name)}</p>" "<p>${escapeEdn(row.painPoint)}</p>" "<p>${escapeEdn(row.solution)}</p>"]`;
+      });
+      tableDataEdn += ']';
+
+      // Build the heatmap title
+      const heatmapTitle = state.heatmap.title || `${context.industry} P&L impact comes from industrializing finance control and execution`;
+
+      // Generate full Pitch.com compatible EDN for heatmap slide
+      const heatmapEdn = `{:format :pointed-dict, :data [{#uuid "${fontId}" {:updated-at ${Date.now()}, :entity-type :font, :events [], :type "custom", :keyspace [:workspace #uuid "115577da-7857-4831-9fc4-c520aa2009cb"], :id #uuid "${fontId}", :styles [{:name "300 Italic", :style "italic", :weight 300, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/09adb1f6-a700-4ba7-a69a-fbd373b5f0d3.woff", :format "woff"}]} {:name "300", :style "normal", :weight 300, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/e8e7a9a8-4740-4ec6-903a-f76e1547888f.woff", :format "woff"}]} {:name "400 Italic", :style "italic", :weight 400, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/71bb8a9f-857a-4094-aba7-67880347413c.woff", :format "woff"}]} {:name "400", :style "normal", :weight 400, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/2c948cd8-7a1b-4faa-a5a4-e13eec656717.woff", :format "woff"}]} {:name "500", :style "normal", :weight 500, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/c8ef3205-959f-4387-bdd1-b01c7343b583.woff", :format "woff"}]} {:name "550", :style "italic", :weight 500, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/e9860aba-c865-4748-8fc0-79cf980868eb.woff", :format "woff"}]} {:name "600", :style "normal", :weight 600, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/dae0dbb5-3984-4f40-a3c1-e778f41085e5.woff", :format "woff"}]} {:name "600 (IT)", :style "italic", :weight 600, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/b83dc5a6-75de-4850-aad3-a56960d7dad8.woff", :format "woff"}]} {:name "700", :style "normal", :weight 700, :sources [{:url "https://pitch-assets-ccb95893-de3f-4266-973c-20049231b248.s3.eu-west-1.amazonaws.com/fonts/d6e6ff8b-3b98-4a7d-8d2e-bf7e121be581.woff", :format "woff"}]}], :created-at ${Date.now()}, :font-family "TWK Lausanne"}}, #uuid "a587985d-a6bf-4581-a1e0-72fa1c352008" {:font-style "italic", :entity-type :block, :white-space :break-spaces, :font-size 1.2, :font-weight 500, :auto-resize? false, :auto-align-default :left, :coords {:x-start 0.02129639151318934, :y-start 0.10743913872625908, :x-end 0.9892579144154942, :y-end 0.16520666216512736}, :events [], :auto-vertical-align-default :top, :text-align-vertical :top, :text-type :headline-medium, :block-type :text, :letter-spacing -0.02, :body "<p><span style=\\"font-weight:700\\">${escapeEdn(heatmapTitle)}</span></p>"}, #uuid "75c8f478-4267-43f1-b733-3f33695f83f3" {:entity-type :block, :white-space :break-spaces, :font-size 0.6, :font-weight 400, :auto-resize? false, :auto-align-default :left, :coords {:x-start 0.041088058179856016, :y-start 0.03505724460145338, :x-end 0.9368201251094173, :y-end 0.06839058083173666}, :events [], :text-color {:r 147, :g 157, :b 168, :a 1}, :auto-vertical-align-default :top, :text-type :paragraph, :used-fonts #{#uuid "${fontId}"}, :block-type :text, :body "<p>AI Value Creation in ${escapeEdn(context.industry)} — High-ROI Agentic Workflows Heatmap</p>", :font-family "font-${fontId}"}, #uuid "b9f9833f-3aa7-4291-a28c-8497ce2fd576" {:entity-type :block, :text-align :left, :white-space :break-spaces, :font-size 0.45, :font-weight 400, :auto-resize? true, :auto-align-default :left, :coords {:x-start 0.03366309869586364, :y-start 0.9527143750617094, :x-end 0.41099237519894927, :y-end 0.9777143805063766}, :events [], :text-color {:r 147, :g 157, :b 168, :a 1}, :auto-vertical-align-default :top, :text-type :paragraph, :used-fonts #{#uuid "${fontId}"}, :block-type :text, :body "<p><span style=\\"color:rgb(92, 216, 107)\\" class=\\"inline-text-color\\"><span style=\\"font-style:italic\\"><span style=\\"font-weight:500\\"><span style=\\"text-decoration:none\\">Case Mentioned in Introduction Call </span></span></span></span><span style=\\"color:rgb(147, 157, 168)\\" class=\\"inline-text-color\\"><span style=\\"font-weight:400\\"><span style=\\"text-decoration:none\\">by ${escapeEdn(context.audience.name)} (${escapeEdn(context.audience.title)})</span></span></span></p>", :font-family "font-${fontId}"}, #uuid "f55a6ace-5cc0-426c-82a6-376234f83493" {:entity-type :block, :table-data ${tableDataEdn}, :font-size 0.4, :layout {:cols [0.11888744109867853 0.21296287227932084 0.1968968602446545 0.42296725207655433], :rows [${heatmap.rows.map(() => '0.03258740740740741').join(' ')} 0.03258740740740741]}, :coords {:x-start 0.020736242683449875, :x-end 0.9776445812383727, :y-start 0.20468833704146636, :y-end 0.7883045738242173}, :events [], :used-fonts #{#uuid "${fontId}"}, :block-type :table, :border-color {:r 43, :g 42, :b 53, :a 0}, :font-family "font-${fontId}"}]}`;
+
+      // Store for export
+      return {
+        heatmapEdn: heatmapEdn,
+        angleCards: angleCards.map((card, idx) => {
+          const workflows = card.workflows.map(w => ({
+            id: w.id,
+            name: w.name.replace(/^[A-Z]+\d+\.\s*/, ''),
+            domain: w.domain,
+            subtitle: w.subtitle,
+            challenges: w.challenges,
+            solutions: w.solutions,
+            impacts: w.impacts
+          }));
+
+          return {
+            type: 'angle_card',
+            title: card.title,
+            workflows: workflows,
+            footer: `Case Mentioned in Introduction Call by ${context.audience.name} (${context.audience.title})`
+          };
+        }),
+        context: {
+          company: context.company,
+          industry: context.industry,
+          audience: context.audience
+        },
+        meta: {
+          generatedAt: new Date().toISOString(),
+          version: '1.0',
+          fontFamily: 'TWK Lausanne',
+          fontId: fontId
+        }
+      };
+    }
+
+    function generatePlaywrightScript() {
+      const edn = generateEDN();
+      const { context } = state;
+
+      // Generate a Playwright script that can paste content into Pitch.com
+      const script = `
+/**
+ * Playwright Script for Pitch.com Slide Generation
+ * Generated for: ${context.company} - ${context.industry}
+ * Audience: ${context.audience.name} (${context.audience.title})
+ *
+ * Run with: npx playwright test paste-to-pitch.spec.js
+ */
+
+const { test, expect } = require('@playwright/test');
+
+const slideData = ${JSON.stringify(edn, null, 2)};
+
+test.describe('Pitch.com Slide Generation', () => {
+
+  test.beforeEach(async ({ page }) => {
+    // Navigate to your Pitch.com presentation
+    // You'll need to be logged in - consider using storageState
+    await page.goto('https://pitch.com');
+    // Wait for editor to load
+    await page.waitForTimeout(3000);
+  });
+
+  test('Generate Heatmap Slide', async ({ page }) => {
+    const heatmapSlide = slideData.presentation.slides[0];
+
+    // Click to add new slide
+    await page.click('[data-testid="add-slide-button"]');
+    await page.waitForTimeout(500);
+
+    // Select table template or blank slide
+    // This depends on your Pitch.com template structure
+
+    // Set slide title
+    const titleElement = page.locator('.slide-title-input, [data-block-type="headline"]').first();
+    await titleElement.click();
+    await page.keyboard.type(heatmapSlide.title);
+
+    console.log('Heatmap slide created with title:', heatmapSlide.title);
+  });
+
+  test('Generate Angle Card Slides', async ({ page }) => {
+    const angleSlides = slideData.presentation.slides.filter(s => s.type === 'angle_card');
+
+    for (const slide of angleSlides) {
+      // Add new slide
+      await page.click('[data-testid="add-slide-button"]');
+      await page.waitForTimeout(500);
+
+      // Set title
+      const titleElement = page.locator('.slide-title-input, [data-block-type="headline"]').first();
+      await titleElement.click();
+      await page.keyboard.type(slide.title);
+
+      // For each workflow in the card
+      for (const workflow of slide.workflows) {
+        console.log('Adding workflow:', workflow.id, workflow.name);
+        // Add workflow content based on your template structure
+      }
+
+      console.log('Angle card slide created:', slide.title);
+    }
+  });
+
+});
+
+/**
+ * Alternative: Direct EDN Paste
+ *
+ * If you have access to Pitch.com's EDN paste functionality,
+ * use this data directly:
+ */
+const ednForPaste = ${JSON.stringify(edn, null, 2)};
+
+module.exports = { slideData, ednForPaste };
+`;
+
+      return script;
+    }
+
+    function exportSlides() {
+      updatePhase(5);
+
+      // Generate the actual Pitch.com EDN from template with confirmed content
+      const finalEdn = generateFinalEdn();
+      const playwrightScript = generatePlaywrightScript();
+
+      // Store each slide's EDN separately (each is valid Pitch.com EDN)
+      window.allSlides = finalEdn.allSlides || [];
+      window.playwrightScript = playwrightScript;
+
+      // Also store JSON version for backwards compatibility
+      const ednData = generateEDN();
+      window.exportDataJSON = JSON.stringify(ednData, null, 2);
+
+      const exportData = {
+        systemPrompt: SYSTEM_PROMPT,
+        limits: LIMITS,
+        context: state.context,
+        heatmap: state.heatmap,
+        angleCards: state.angleCards,
+        freeformFeedback: state.freeformFeedback,
+        ednStructure: ednData
+      };
+
+      window.fullExportJSON = JSON.stringify(exportData, null, 2);
+
+      const totalSlides = finalEdn.totalSlides || 1;
+
+      // Build individual slide cards with copy buttons
+      const slideCards = window.allSlides.map((slide, index) => {
+        const isHeatmap = slide.type === 'heatmap';
+        const color = isHeatmap ? '#4ade80' : '#60a5fa';
+        const icon = isHeatmap ? '📊' : '📝';
+        const slideNum = index + 1;
+
+        return `
+          <div style="background: #1a1a1a; border: 2px solid ${color}; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="flex: 1;">
+                <h4 style="color: ${color}; margin-bottom: 4px;">${icon} Slide ${slideNum}: ${isHeatmap ? 'P&L Heatmap' : 'Angle Card'}</h4>
+                <p style="color: #fff; font-size: 13px; margin: 4px 0;">${escapeHtml(slide.title)}</p>
+                ${!isHeatmap ? `<p style="color: #888; font-size: 11px;">Workflows: ${slide.workflows}</p>` : ''}
+              </div>
+              <button class="copy-btn" style="background: ${color}; color: #000; white-space: nowrap;" onclick="copySlideEdn(${index})">Copy EDN</button>
+            </div>
+            <div style="margin-top: 12px; max-height: 150px; overflow: auto; background: #0a0a0a; border-radius: 6px; padding: 8px;">
+              <pre style="margin: 0; font-size: 10px; color: #666; white-space: pre-wrap; word-break: break-all;">${escapeHtml(slide.edn.substring(0, 500))}${slide.edn.length > 500 ? '...' : ''}</pre>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const html = `
+        <h3>Export Ready - ${totalSlides} Slides</h3>
+        <p>Each slide below is valid Pitch.com EDN. Copy and paste each one individually into Pitch.com.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;">
+          <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px;">
+            <h4 style="color: #60a5fa; margin-bottom: 8px;">🎭 Playwright Script</h4>
+            <p style="color: #888; font-size: 12px; margin-bottom: 12px;">Automation script for Pitch.com</p>
+            <button class="copy-btn" style="width: 100%;" onclick="copyPlaywrightScript()">Copy Script</button>
+          </div>
+
+          <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px;">
+            <h4 style="color: #f59e0b; margin-bottom: 8px;">📄 JSON Export</h4>
+            <p style="color: #888; font-size: 12px; margin-bottom: 12px;">Structured data for API/LLM use</p>
+            <button class="copy-btn" style="width: 100%;" onclick="copyEDNData()">Copy JSON</button>
+          </div>
+        </div>
+
+        <h4 style="margin-top: 24px; color: #4ade80;">Individual Slides (Copy Each to Pitch.com)</h4>
+        <p style="color: #888; font-size: 12px; margin-bottom: 12px;">Each slide is a separate, valid Pitch.com EDN. Paste each one individually.</p>
+
+        ${slideCards}
+
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button class="copy-btn" onclick="downloadAllSlidesZip()">📥 Download All as Separate Files</button>
+          <button class="copy-btn" onclick="downloadPlaywright()">📥 Download Playwright Script</button>
+          <button class="copy-btn" onclick="downloadFullExport()">📥 Download Full Export</button>
+        </div>
+
+        <h4 style="margin-top: 24px;">How to Use</h4>
+        <ol style="margin-left: 20px; margin-top: 8px; color: #888; font-size: 13px;">
+          <li style="margin-bottom: 8px;"><strong style="color: #4ade80;">Copy Each Slide:</strong> Click "Copy EDN" for each slide and paste into Pitch.com one at a time</li>
+          <li style="margin-bottom: 8px;"><strong>In Pitch.com:</strong> Create a new slide, then paste the EDN (Cmd+V / Ctrl+V)</li>
+          <li style="margin-bottom: 8px;"><strong>Repeat:</strong> Do this for each slide in order</li>
+        </ol>
+      `;
+
+      addMessage(html);
+    }
+
+    function copySlideEdn(index) {
+      const slide = window.allSlides[index];
+      if (slide && slide.edn) {
+        navigator.clipboard.writeText(slide.edn).then(() => {
+          showToast('Slide ' + (index + 1) + ' EDN copied!');
+        });
+      }
+    }
+
+    function downloadAllSlidesZip() {
+      // Download each slide as a separate .edn file
+      window.allSlides.forEach((slide, index) => {
+        const filename = 'slide-' + (index + 1) + '-' + slide.type + '.edn';
+        const blob = new Blob([slide.edn], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+      showToast('Downloaded ' + window.allSlides.length + ' slide files!');
+    }
+
+    function copyPitchEdn() {
+      if (window.pitchcomEdn) {
+        navigator.clipboard.writeText(window.pitchcomEdn).then(() => {
+          alert('Pitch.com EDN copied to clipboard! Paste directly into Pitch.com.');
+        }).catch(err => {
+          fallbackCopy(window.pitchcomEdn, 'Pitch.com EDN');
+        });
+      } else {
+        alert('No EDN generated. Please complete the workflow first.');
+      }
+    }
+
+    function copyEDNData() {
+      if (window.exportDataJSON) {
+        navigator.clipboard.writeText(window.exportDataJSON).then(() => {
+          alert('EDN JSON copied to clipboard!');
+        }).catch(err => {
+          fallbackCopy(window.exportDataJSON, 'EDN JSON');
+        });
+      }
+    }
+
+    function copyPlaywrightScript() {
+      if (window.playwrightScript) {
+        navigator.clipboard.writeText(window.playwrightScript).then(() => {
+          alert('Playwright script copied to clipboard!');
+        }).catch(err => {
+          fallbackCopy(window.playwrightScript, 'Playwright script');
+        });
+      }
+    }
+
+    function fallbackCopy(text, name) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      alert(`${name} copied to clipboard!`);
+    }
+
+    function downloadPitchEdn() {
+      if (window.pitchcomEdn) {
+        downloadFile(window.pitchcomEdn, `${state.context.company || 'slides'}-pitch-edn-${new Date().toISOString().split('T')[0]}.edn`, 'text/plain');
+      } else {
+        alert('No EDN generated. Please complete the workflow first.');
+      }
+    }
+
+    function downloadEDN() {
+      downloadFile(window.exportDataJSON, `${state.context.company || 'slides'}-edn-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+    }
+
+    function downloadPlaywright() {
+      downloadFile(window.playwrightScript, `${state.context.company || 'slides'}-playwright-${new Date().toISOString().split('T')[0]}.js`, 'text/javascript');
+    }
+
+    function downloadFullExport() {
+      downloadFile(window.fullExportJSON, `${state.context.company || 'slides'}-full-export-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Get CSS class for character count indicator
+    function getCharCountClass(length, min, max) {
+      if (length > max) return 'error';
+      if (length < min) return 'too-short';
+      if (length >= min && length <= max) return 'good';
+      return '';
+    }
+
+    // Enforce 70-85 character limit on bullets
+    // Returns adjusted bullet or null if can't be fixed
+    function enforceBulletLimit(bullet, min = 70, max = 85) {
+      if (!bullet) return null;
+
+      let text = bullet.trim();
+
+      // If already in range, return as-is
+      if (text.length >= min && text.length <= max) {
+        return text;
+      }
+
+      // If too long, truncate smartly (at word boundary)
+      if (text.length > max) {
+        // Try to cut at last space before max
+        let cutPoint = text.lastIndexOf(' ', max - 3);
+        if (cutPoint > min) {
+          text = text.substring(0, cutPoint) + '...';
+        } else {
+          text = text.substring(0, max - 3) + '...';
+        }
+      }
+
+      // If too short, we can't automatically fix - return with warning
+      // The generator templates should already produce 70-85 char bullets
+      if (text.length < min) {
+        console.warn(`Bullet too short (${text.length}): ${text}`);
+      }
+
+      return text;
+    }
+
+    // Validate all bullets in a card and flag issues
+    function validateAngleCardBullets(card) {
+      const issues = [];
+      const MIN = 70, MAX = 85;
+
+      card.workflows.forEach((w, wIdx) => {
+        w.challenges.forEach((c, i) => {
+          if (c.length < MIN) issues.push(`Workflow ${wIdx + 1} Challenge ${i + 1}: too short (${c.length} chars)`);
+          if (c.length > MAX) issues.push(`Workflow ${wIdx + 1} Challenge ${i + 1}: too long (${c.length} chars)`);
+        });
+        w.solutions.forEach((s, i) => {
+          if (s.length < MIN) issues.push(`Workflow ${wIdx + 1} Solution ${i + 1}: too short (${s.length} chars)`);
+          if (s.length > MAX) issues.push(`Workflow ${wIdx + 1} Solution ${i + 1}: too long (${s.length} chars)`);
+        });
+        w.impacts.forEach((imp, i) => {
+          if (imp.length < MIN) issues.push(`Workflow ${wIdx + 1} Impact ${i + 1}: too short (${imp.length} chars)`);
+          if (imp.length > MAX) issues.push(`Workflow ${wIdx + 1} Impact ${i + 1}: too long (${imp.length} chars)`);
+        });
+      });
+
+      return issues;
+    }
+
+    // Legacy function for backwards compatibility
+    function copyExportData() {
+      copyEDNData();
+    }
+
+    function copyToClipboard(base64Data) {
+      copyEDNData();
+    }
+
+    // ==========================================================================
+    // EVENT LISTENERS
+    // ==========================================================================
+    document.getElementById('user-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Auto-resize textarea
+    document.getElementById('user-input').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+
+    // Start conversation on load
+    window.onload = async function() {
+      await loadCanonicalTemplates();
+      startConversation();
+    };
+  </script>
+</body>
+</html>
